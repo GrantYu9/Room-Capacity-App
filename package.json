@@ -1,0 +1,38 @@
+{
+  "name": "room-capacity-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "start": "node server/local.js",
+    "db:check": "node scripts/database.js check",
+    "db:init": "node scripts/database.js init",
+    "device:add": "node scripts/add-device.js",
+    "rooms:import": "node scripts/import-rooms.js",
+    "test": "node --test test/*.test.js",
+    "test:pi": "python3 -m unittest discover -s test -p 'test_*.py'",
+    "test:integration": "node --test test/integration.js",
+    "dev:api": "PORT=3100 node --watch server/local.js",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "lucide-react": "^1.70.0",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "vite": "^8.3.6"
+  }
+}

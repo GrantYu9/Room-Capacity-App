@@ -1,0 +1,42 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  availableSeats,
+  freshness,
+  noiseBand,
+  roomState,
+  sampleRooms,
+} from "../src/rooms.js";
+
+test("unknown capacity stays unknown; stale counts are not treated as available seats", () => {
+  const now = Date.now();
+  const room = sampleRooms(now)[0];
+  assert.equal(availableSeats(room, now, 60), 11);
+  assert.equal(
+    availableSeats({ ...room, total_capacity: null }, now, 60),
+    null,
+  );
+  assert.equal(availableSeats(room, now + 61000, 60), null);
+  assert.equal(
+    freshness({ ...room, latest_reading: null }, now, 60),
+    "waiting",
+  );
+  assert.equal(roomState(room, now + 61000, 60).key, "delayed");
+  assert.equal(availableSeats({ ...room, total_capacity: 2 }, now, 60), 0);
+});
+
+test("noise bands use the supplied unit and never treat missing readings as quiet", () => {
+  assert.equal(noiseBand(null), null);
+  assert.equal(
+    noiseBand({ noise_level: 0.2, noise_unit: "relative" }).level,
+    "quiet",
+  );
+  assert.equal(
+    noiseBand({ noise_level: 55, noise_unit: "dBA" }).level,
+    "moderate",
+  );
+  assert.equal(
+    noiseBand({ noise_level: 75, noise_unit: "dBA" }).level,
+    "lively",
+  );
+});

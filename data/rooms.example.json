@@ -1,0 +1,14 @@
+[
+  {
+    "room_id": "room-1",
+    "name": "Prototype room (metadata pending)",
+    "building": null,
+    "room_number": null,
+    "address": null,
+    "latitude": null,
+    "longitude": null,
+    "total_capacity": null,
+    "source_url": null,
+    "source_checked_at": null
+  }
+]
