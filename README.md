@@ -2,7 +2,7 @@
 
 A responsive study-space dashboard for UBC: current occupancy, sound readings, room search, building filters, locally saved favourites, and recent activity. Built with React and Vite, with a Node API and a Tiger Data / TimescaleDB database.
 
-**Room metadata is collected separately from the app runtime.** `data/rooms.json` contains 68 informal learning spaces from UBC’s directory, checked on November 7, 2026 (Vancouver time). This is a directory snapshot, not a claim that these spaces have sensors or current readings. A clearly labeled sample preview contains fictional rooms; unavailable live data never falls back to sample data automatically.
+**No UBC websites have been scraped.** Location, total capacity, and source details remain nullable until collected later. A clearly labeled sample preview contains fictional rooms; unavailable live data never falls back to sample data automatically.
 
 ## Development
 
@@ -48,7 +48,7 @@ The same repository hosts the website and API. `vercel.json` configures Vite's `
 
 Preview deployments need their own environment variables and may have Vercel deployment protection enabled. A physical Pi must be able to access the chosen API URL without an interactive Vercel login.
 
-The database, device tokens, and room metadata collection remain separate from the frontend build. The browser receives only public room metadata and aggregate readings. `.gitignore` and `.vercelignore` exclude local credentials and generated files.
+The database, device tokens, and any eventual metadata collection remain separate from the frontend build. The browser receives only public room metadata and aggregate readings. `.gitignore` and `.vercelignore` exclude local credentials and generated files.
 
 For this shared Tiger service, `sslmode=require` follows `psql` semantics: TLS encryption without certificate identity verification. The Node configuration enables libpq compatibility only for that explicit setting. Explicit `sslmode=verify-full` remains unchanged and requires a trusted server certificate/CA.
 
@@ -100,39 +100,17 @@ The device can upload only to its assigned room. Use ISO timestamps with a timez
 
 Unknown room fields are `null`. `occupancy_fraction` is also null when capacity is unknown or readings are stale. Latest readings use measurement time, so delayed uploads do not replace newer measurements.
 
-## Room metadata
+## Room metadata, later
 
-The source is [UBC’s Find an Informal Learning Space directory](https://learningspaces.ubc.ca/find-a-space-informal/?classroom=&building=&filters=%257B%257D). `data/rooms.json` contains all **68 entries returned by the unfiltered Vancouver informal directory** at collection time. Each linked room detail page and all 38 linked building pages were checked. This does not cover every study space on campus, imply access at all hours, or provide occupancy readings.
-
-`data/rooms.collection.json` records coverage, pagination, source checks, identity decisions, and flagged entries. Collection used the directory’s public WordPress AJAX request (`POST /wp-admin/admin-ajax.php`, action `find_a_space_rooms`, campus `vancouver`, formal `false`, sort `alpha_asc`, no filters). Its script supplies a page nonce. Following each returned `offset` produced seven pages of 10, 10, 10, 10, 10, 10, and 8 records; the last response had no next offset. Every entry was verified against its **Room Link**, and addresses came from the **Address** section of its linked building page. There is no collection request in the app, API, build, or importer, and no scheduled collection job.
-
-Validate the checked-in dataset locally without a database or network request:
+`data/rooms.example.json` defines the future metadata contract. Import a local JSON array with:
 
 ```sh
-node --test test/room-metadata.test.js
+npm run rooms:import -- path/to/rooms.json
 ```
 
-The check uses the same `validateMetadata` rules as the importer, checks duplicate identities and collection coverage, and verifies that metadata without readings yields “Awaiting a reading.” To load the records into a **confirmed local development database**, configure `DATABASE_URL` privately, initialize that database if needed, then run:
+The importer reads the local file and makes **no requests to UBC websites**. Each entry replaces the room's complete metadata; optional fields omitted from that entry become null. Device assignments and sensor history are preserved. The entire import rolls back if any record fails validation.
 
-```sh
-npm run rooms:import -- data/rooms.json
-```
-
-After importing, run `npm run dev:api` and check `http://localhost:3100/api/rooms`; run `npm run dev` to view the dashboard. Rooms without readings show **Awaiting a reading**, with unknown current occupancy and available seats. The JSON is not loaded directly by the frontend: without an import, it will not change the API’s room list. No database was configured during this collection, so an actual database import and `GET /api/rooms` verification were not performed.
-
-The importer reads the local file and makes **no requests to UBC websites**. Each entry replaces the room’s complete metadata; optional fields omitted from that entry become null. Before a future refresh/import, reconcile existing metadata: preserve the room ID for a clear source/location match, retain known fields when UBC provides no replacement, and flag ambiguous matches rather than guessing. Device assignments and sensor history are preserved. The entire import rolls back if any record fails validation. This collection created a new `data/rooms.json`; the unidentified `room-1` prototype in `data/rooms.example.json` was left unchanged and was not mapped to a UBC space.
-
-Fields: `room_id`, `name`, `building`, `room_number`, `address`, `latitude`, `longitude`, `total_capacity`, `source_url`, `source_checked_at`. IDs use `ubc-` plus the detail URL slug; the audit also retains UBC’s directory record ID for future rename reconciliation. The published Room Number field sometimes contains a floor or named area; those labels are retained as published. Grouped entries remain one space and are not split into invented rooms. Coordinates are null. Source URLs use the matching **Copy permalink** / directory **Room Link**; the pages’ HTML canonical tags incorrectly reference an unrelated legacy news page. Check times are UTC, falling on November 8, 2026 UTC / November 7 in Vancouver.
-
-Review these capacity decisions before importing:
-
-- **HENN – Foyer:** capacity field says 42, but the overview says 34 seats. `total_capacity` is null pending clarification.
-- **EDC – Various Informal Learning Spaces:** published capacity is 140; the overview describes more than 140 seats. Keep 140 as the published estimate for the grouped space.
-- **PCW – Rooms 2108, 2109, 2111:** keep the single directory entry and its published capacity of 12; do not assume 12 seats per room.
-- **BUCH – A Block Alcove Lounge:** keep published capacity 16; the overview’s 8 lounge seats exclude additional benches.
-- **ORCH – Study Lounge:** keep published capacity 40; the overview separately describes 12 seats outside the lounge.
-
-Unknown values stay null. No sensor readings, devices, API changes, or schema changes are part of this metadata collection.
+Fields: `room_id`, `name`, `building`, `room_number`, `address`, `latitude`, `longitude`, `total_capacity`, `source_url`, `source_checked_at`. Coordinates must be supplied together. Source URLs must use HTTPS on `ubc.ca` or a subdomain. Only provide `source_checked_at` after actually checking the source. No scraper is implemented or scheduled.
 
 ## Tests
 

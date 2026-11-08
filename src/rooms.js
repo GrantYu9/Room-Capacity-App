@@ -48,12 +48,12 @@ export function roomState(room, now, staleAfterSeconds) {
     return { key: "waiting", label: "Awaiting a reading" };
   if (fresh === "delayed") return { key: "delayed", label: "Reading delayed" };
   const people = room.latest_reading.people_count;
-  if (people === 0) return { key: "open", label: "No people detected" };
+  if (people === 0) return { key: "open", label: "All yours" };
   if (room.total_capacity == null)
-    return { key: "live", label: "Recent reading" };
+    return { key: "live", label: "Live reading" };
   if (people >= room.total_capacity)
-    return { key: "full", label: "No estimated seats" };
-  return { key: "open", label: "Estimated seats available" };
+    return { key: "full", label: "Currently full" };
+  return { key: "open", label: "Space available" };
 }
 
 export function availableSeats(room, now, staleAfterSeconds) {
@@ -66,10 +66,10 @@ export function availableSeats(room, now, staleAfterSeconds) {
 }
 
 export function formatNoise(reading) {
-  if (!reading || !Number.isFinite(reading.noise_level)) return "—";
+  if (!reading) return "—";
   return reading.noise_unit === "dBA"
     ? `${reading.noise_level.toFixed(0)} dBA`
-    : `${Math.round(reading.noise_level * 100)}% relative sound level`;
+    : `${Math.round(reading.noise_level * 100)}% relative`;
 }
 
 export function timeAgo(time, now = Date.now()) {

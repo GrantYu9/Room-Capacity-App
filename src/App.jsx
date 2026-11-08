@@ -139,11 +139,9 @@ function Modal({ title, children, onClose, wide = false }) {
   const ref = useRef(null);
   useEffect(() => {
     const dialog = ref.current;
-    const opener = document.activeElement;
     dialog.showModal();
     return () => {
       if (dialog.open) dialog.close();
-      if (opener?.isConnected) opener.focus();
     };
   }, []);
   return (
@@ -200,8 +198,7 @@ function HowItWorks({ onClose }) {
             <h3>Check the latest reading</h3>
             <p>
               See the people count, available seats when capacity is known, and
-              the sound band at the last measurement. Favourites are saved only
-              in this browser.
+              the current noise reading.
             </p>
           </div>
         </div>
@@ -210,9 +207,8 @@ function HowItWorks({ onClose }) {
           <div>
             <h3>Settle in and focus</h3>
             <p>
-              The dashboard checks for updates roughly every 10 seconds. Each
-              measurement has its own timestamp; a successful check does not
-              mean a new measurement arrived. Delayed readings are marked.
+              Readings refresh every 10 seconds. Delayed readings are clearly
+              marked, and unknown details stay unlisted.
             </p>
           </div>
         </div>
@@ -244,9 +240,7 @@ function NoiseLevel({ reading, live }) {
         <i />
       </span>
       <div>
-        <span className="metric-caption">
-          Sound band{reading?.noise_unit === "relative" ? " · approximate" : ""}
-        </span>
+        <span className="metric-caption">Noise level</span>
         <strong>{band?.label ?? "No current reading"}</strong>
       </div>
       <span className="noise-value">{live ? formatNoise(reading) : "—"}</span>
@@ -262,7 +256,6 @@ function RoomCard({
   onSave,
   onOpen,
   index,
-  demo,
 }) {
   const state = roomState(room, now, staleAfterSeconds);
   const live = freshness(room, now, staleAfterSeconds) === "live";
@@ -303,14 +296,13 @@ function RoomCard({
         </button>
       </div>
       <div className="room-card-body">
-        {demo && <p className="sample-label">Fictional sample data</p>}
         <h3>{room.name}</h3>
         <p className="room-location">
           <MapPin size={14} aria-hidden="true" />
           {location || "Location not listed yet"}
         </p>
         <div className="occupancy-heading">
-          <span>Estimated people</span>
+          <span>Occupancy</span>
           <span>
             <strong>{count ?? "—"}</strong>
             <span className="capacity"> / {capacity ?? "—"}</span>
@@ -335,33 +327,32 @@ function RoomCard({
           />
         </div>
         <p className="seats-caption">
-          {capacity == null ? (
-            "Capacity unknown · available seats unknown"
-          ) : !live ? (
+          {!live ? (
             state.key === "waiting" ? (
               "Waiting for the first update"
             ) : (
               "Showing no current occupancy"
             )
+          ) : seats == null ? (
+            "Total capacity not listed yet"
           ) : seats === 0 ? (
-            "0 estimated seats available"
+            "Check back for an open seat"
           ) : (
             <>
-              Estimated <span>{seats} {seats === 1 ? "seat" : "seats"}</span> available
+              <span>
+                {seats} {seats === 1 ? "seat" : "seats"}
+              </span>{" "}
+              available
             </>
           )}
         </p>
         <NoiseLevel reading={room.latest_reading} live={live} />
       </div>
       <div className="room-card-footer">
-        <span
-          title={room.latest_reading
-            ? new Date(room.latest_reading.measured_at).toLocaleString()
-            : undefined}
-        >
+        <span>
           <Clock3 size={12} />
           {room.latest_reading
-            ? `Measured ${timeAgo(room.latest_reading.measured_at, now).toLowerCase()}`
+            ? `Updated ${timeAgo(room.latest_reading.measured_at, now).toLowerCase()}`
             : "No reading yet"}
         </span>
         <button onClick={() => onOpen(room)} aria-label={`View ${room.name}`}>
@@ -377,8 +368,8 @@ function ActivityChart({ readings }) {
     return (
       <div className="activity-empty">
         <AudioLines size={25} strokeWidth={1.4} />
-        <strong>No occupancy history yet.</strong>
-        <p>Recent occupancy will appear after readings arrive.</p>
+        <strong>A little quiet in here.</strong>
+        <p>Activity will appear after readings arrive.</p>
       </div>
     );
   const max = Math.max(4, ...readings.map((r) => r.people_count));
@@ -508,7 +499,7 @@ function RoomDetails({
   return (
     <Modal title={room.name} onClose={onClose} wide>
       <span className="eyebrow">
-        {demo ? "Fictional sample data" : "Your next place to focus"}
+        {demo ? "Sample space · not live data" : "Your next place to focus"}
       </span>
       <h2>{room.name}</h2>
       <p className="detail-location">
@@ -532,7 +523,7 @@ function RoomDetails({
       <div className="detail-metrics">
         <div>
           <Users size={19} />
-          <span>Estimated people</span>
+          <span>People right now</span>
           <strong>
             {live ? room.latest_reading.people_count : "—"}
             <small> / {room.total_capacity ?? "—"}</small>
@@ -540,7 +531,7 @@ function RoomDetails({
         </div>
         <div>
           <AudioLines size={20} />
-          <span>Sound band · approximate</span>
+          <span>Noise level</span>
           <strong>
             {live ? noiseBand(room.latest_reading)?.label : "—"}
             <small>
@@ -550,22 +541,13 @@ function RoomDetails({
         </div>
         <div>
           <DoorOpen size={20} />
-          <span>Estimated available seats</span>
+          <span>Total capacity</span>
           <strong>
-            {availableSeats(room, now, staleAfterSeconds) ?? "—"}
-            <small>
-              {room.total_capacity == null
-                ? "Capacity unknown"
-                : `Capacity: ${room.total_capacity} seats`}
-            </small>
+            {room.total_capacity ?? "—"}
+            <small>{room.total_capacity ? "seats" : "Not listed yet"}</small>
           </strong>
         </div>
       </div>
-      <p className="measurement-time">
-        {room.latest_reading
-          ? `Last measured ${new Date(room.latest_reading.measured_at).toLocaleString()} (${timeAgo(room.latest_reading.measured_at, now).toLowerCase()})`
-          : "Awaiting the first measurement"}
-      </p>
       {room.location?.address && (
         <p className="address-line">
           <MapPin size={15} />
@@ -573,17 +555,17 @@ function RoomDetails({
         </p>
       )}
       <div className="activity-heading">
-        <h3>Recent occupancy</h3>
-        <span>{demo ? "Up to 100 recent readings · fictional" : "Up to 100 recent readings"}</span>
+        <h3>Recent activity</h3>
+        <span>{demo ? "Illustrative readings" : "Latest 100 readings"}</span>
       </div>
       {history.status === "loading" ? (
         <div className="activity-empty">
           <RefreshCw size={22} className="spin" />
-          <p>Loading recent occupancy…</p>
+          <p>Loading recent activity…</p>
         </div>
       ) : history.status === "error" ? (
         <div className="activity-empty">
-          <p>Occupancy history couldn’t be loaded.</p>
+          <p>Activity couldn’t be loaded.</p>
           <button
             className="text-button"
             onClick={() => setAttempt((x) => x + 1)}
@@ -741,32 +723,21 @@ export default function App() {
               <span className="tiny-star" aria-hidden="true">
                 <Asterisk size={20} />
               </span>{" "}
-              UBC prototype · limited coverage
+              A better place to be productive
             </span>
             <h1 id="hero-title">
-              Find a quieter
+              Find a little room
               <br />
-              place to <em>study</em>
+              to <em>focus.</em>
             </h1>
             <p>
-              See recent occupancy and sound readings for monitored study spaces.
-              This UBC prototype covers a limited set of rooms; estimates can
-              help you decide where to try next.
+              Less wandering. More getting things done.
+              <br className="desktop-break" /> Find your next study spot, before
+              you head over.
             </p>
-            <div className="hero-actions">
-              <a href="#spaces" className="primary-button">
-                Browse study spaces <ArrowDown size={16} />
-              </a>
-              <button
-                className="secondary-button"
-                onClick={() => {
-                  switchDemo(true);
-                  spacesRef.current?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Try sample preview <ArrowUpRight size={16} />
-              </button>
-            </div>
+            <a href="#spaces" className="hero-link">
+              Let’s find your space <ArrowDown size={16} />
+            </a>
           </div>
           <div className="hero-art">
             <div className="art-note">
@@ -783,9 +754,13 @@ export default function App() {
           <div className="summary-intro">
             <span className="campus-label">
               <MapPin size={14} />
-              {demo ? "Fictional sample data" : "Monitored UBC spaces"}
+              UBC study spaces
             </span>
-            <h2>{demo ? "Sample preview" : "Limited coverage"}</h2>
+            <h2>
+              Around campus,
+              <br />
+              <span>right now.</span>
+            </h2>
           </div>
           <div className="summary-stat">
             <span className="stat-icon">
@@ -793,16 +768,10 @@ export default function App() {
             </span>
             <div>
               <strong>
-                {!demo && !live.checkedAt ? "—" : String(rooms.length).padStart(2, "0")}
+                {initialLoading ? "—" : String(rooms.length).padStart(2, "0")}
               </strong>
-              <span>{demo ? "Fictional sample rooms" : "Monitored rooms"}</span>
-              <small>
-                {initialLoading
-                  ? "Checking for readings…"
-                  : !demo && !live.checkedAt
-                    ? "Coverage unavailable"
-                    : `${reporting.length} of ${rooms.length} rooms have recent readings`}
-              </small>
+              <span>Spaces to explore</span>
+              <small>{reporting.length} with a current reading</small>
             </div>
           </div>
           <div className="summary-stat">
@@ -811,7 +780,7 @@ export default function App() {
             </span>
             <div>
               <strong>{seats ?? "—"}</strong>
-              <span>{demo ? "Sample estimated seats" : "Estimated available seats"}</span>
+              <span>Seats available</span>
               <small>
                 {knownSeats.length
                   ? `Across ${knownSeats.length} reporting ${knownSeats.length === 1 ? "space" : "spaces"}`
@@ -825,11 +794,11 @@ export default function App() {
             </span>
             <div>
               <strong>{people ?? "—"}</strong>
-              <span>{demo ? "Sample estimated people" : "Estimated people"}</span>
+              <span>People studying</span>
               <small>
                 {reporting.length
-                  ? `Across ${reporting.length} recent ${reporting.length === 1 ? "space" : "spaces"}`
-                  : "No recent readings"}
+                  ? `Across ${reporting.length} live ${reporting.length === 1 ? "space" : "spaces"}`
+                  : "Waiting for live readings"}
               </small>
             </div>
           </div>
@@ -855,12 +824,12 @@ export default function App() {
             >
               <span className="connection-dot" />
               {demo
-                ? "Sample preview · fictional"
+                ? "Sample preview · not live"
                 : live.status === "ok"
-                  ? "API reachable · checks every ~10s"
+                  ? "Connected · refreshes every 10s"
                   : live.status === "error"
-                    ? "API refresh failed · retrying"
-                    : "Connecting to API"}
+                    ? "Updates paused · retrying"
+                    : "Connecting to live data"}
             </span>
           </div>
           {demo && (
@@ -873,7 +842,7 @@ export default function App() {
                 </p>
               </div>
               <button onClick={() => switchDemo(false)}>
-                Back to monitored rooms <ArrowRight size={15} />
+                Back to live data <ArrowRight size={15} />
               </button>
             </div>
           )}
@@ -957,8 +926,8 @@ export default function App() {
               <WifiOff size={18} />
               <p>
                 {live.checkedAt
-                  ? `We couldn’t refresh the latest data. Last successful check: ${new Date(live.checkedAt).toLocaleString()} (${timeAgo(live.checkedAt, now).toLowerCase()}). Cached readings may be out of date.`
-                  : "We couldn’t load monitored spaces. Retry or try the sample preview."}
+                  ? "We couldn’t refresh the latest data. Previous readings may be out of date."
+                  : "We couldn’t load live spaces. Check back shortly, or explore the sample preview."}
               </p>
               <button onClick={live.retry}>
                 Retry <RefreshCw size={14} />
@@ -971,10 +940,10 @@ export default function App() {
               : `${filtered.length} ${filtered.length === 1 ? "space" : "spaces"}${query || building !== "all" || filter !== "all" ? " found" : " to explore"}`}
             <span>
               {demo
-                ? "Fictional sample data"
+                ? "Illustrative data"
                 : live.checkedAt
                   ? `Last checked ${timeAgo(live.checkedAt, now).toLowerCase()}`
-                  : "No successful API check yet"}
+                  : "Live data"}
             </span>
           </div>
           {initialLoading ? (
@@ -1000,7 +969,6 @@ export default function App() {
                   onSave={toggle}
                   onOpen={(room) => setSelected(room.room_id)}
                   index={index}
-                  demo={demo}
                 />
               ))}
             </div>
@@ -1016,18 +984,14 @@ export default function App() {
                   ? "Keep a good spot close."
                   : rooms.length
                     ? "No spaces match just yet."
-                    : live.status === "error"
-                      ? "Monitored spaces unavailable."
-                      : "No monitored rooms yet."}
+                    : "A little room is on the way."}
               </h3>
               <p>
                 {filter === "saved" && !query
                   ? "Tap the heart on a space to find it here next time."
                   : rooms.length
                     ? "Try another search or give your filters a little more room."
-                    : live.status === "error"
-                      ? "Use Retry to check the API again, or explore the fictional sample preview."
-                      : "The API is reachable, but no rooms have been added. You can still try the sample preview."}
+                    : "Study spaces will appear here when they’re added. In the meantime, take a look around the sample preview."}
               </p>
               {rooms.length > 0 && (
                 <button className="secondary-button" onClick={clearFilters}>
@@ -1042,7 +1006,7 @@ export default function App() {
                 <BookOpen size={23} strokeWidth={1.5} />
               </span>
               <div>
-                <h3>Explore a fictional study-space preview.</h3>
+                <h3>A sneak peek at a calmer campus.</h3>
                 <p>
                   Curious what room looks like with more spaces? Take a look at
                   the sample preview.
@@ -1059,7 +1023,7 @@ export default function App() {
           <div className="data-note">
             <span>
               <span className="legend-dot" />
-              {demo ? "Fictional readings for preview only." : "Measurements have their own timestamps."}
+              Current readings refresh automatically.
             </span>
             <button onClick={() => setHow(true)}>
               A note on the numbers <Info size={14} />
@@ -1081,7 +1045,7 @@ export default function App() {
       <footer className="page-width site-footer">
         <Brand small />
         <p>Made for better study days.</p>
-        <span>An independent UBC prototype · limited coverage.</span>
+        <span>An independent campus project.</span>
       </footer>
       {how && <HowItWorks onClose={() => setHow(false)} />}
       {currentRoom && (
