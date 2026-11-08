@@ -1,8 +1,8 @@
-# room. — a little space to focus
+# SensoryAtlas — a little space to focus
 
 A responsive study-space dashboard for UBC: current occupancy, sound readings, room search, building filters, locally saved favourites, and recent activity. Built with React and Vite, with a Node API and a Tiger Data / TimescaleDB database.
 
-**Room metadata is collected separately from the app runtime.** `data/rooms.json` contains 68 informal learning spaces from UBC’s directory, checked on November 7, 2026 (Vancouver time). This is a directory snapshot, not a claim that these spaces have sensors or current readings. A clearly labeled sample preview contains fictional rooms; unavailable live data never falls back to sample data automatically.
+**Room metadata is collected separately from the app runtime.** `data/rooms.json` contains 68 informal learning spaces from UBC’s directory, checked on November 7, 2026 (Vancouver time). This is a directory snapshot, not a claim that these spaces have sensors or current readings. A clearly labeled demo mode contains fictional rooms; unavailable live data never falls back to sample data automatically.
 
 ## Development
 
@@ -22,15 +22,15 @@ In another terminal:
 npm run dev
 ```
 
-The frontend runs at `http://localhost:5173` and proxies `/api` to the development API on port `3100`. `npm start` also runs the standalone API on port `3000` by default. Without an API connection, the frontend shows a connection error and still offers the explicit sample preview.
+The frontend runs at `http://localhost:5173` and proxies `/api` to the development API on port `3100`. `npm start` also runs the standalone API on port `3000` by default. Without an API connection, the frontend shows a connection error and keeps the public directory browsable and offers explicit demo mode (`?demo=1`).
 
 The existing Tiger service has already been initialized for this project. `db:init` is safe to rerun. `db:check` verifies connectivity and table presence.
 
 ## Frontend behavior
 
 - Polls room data every 10 seconds, with a 12-second request timeout and a manual retry action.
-- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases shared by monitored and unmonitored search. Room numbers stay exact. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
-- Favourites are saved in the visitor's browser. Counts reflect only rooms in the current live/sample view.
+- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases for the unified directory. Room numbers stay exact. All listed spaces share one search and filter set. Recent readings appear first by default. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
+- Favourites are saved in the visitor's browser. Live and demo favourites are stored separately. Existing live favourites are preserved.
 - Missing capacity is **unknown**, never zero. Available seats are calculated only from fresh readings and known capacity. Counts over capacity are preserved.
 - Delayed readings are excluded from current availability and people totals. The API's `stale_after_seconds` controls freshness.
 - Noise retains its original unit. Relative readings are 0–1; calibrated dBA readings are 0–160. UI noise bands are approximate and are not a calibration or standards claim.

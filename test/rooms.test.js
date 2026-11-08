@@ -8,6 +8,7 @@ import {
   noiseBand,
   roomState,
   sampleRooms,
+  timeAgo,
 } from "../src/rooms.js";
 
 test("unknown capacity stays unknown; stale counts are not treated as available seats", () => {
@@ -56,15 +57,20 @@ test("a known address or coordinates are displayed when a building name is missi
   assert.equal(locationLabel({ latitude: null, longitude: null }), "");
 });
 
-
 test("zero people and over-capacity estimates retain their counts and clamp seats", () => {
   const now = Date.now();
   const room = sampleRooms(now)[3];
   assert.equal(room.latest_reading.people_count, 0);
   assert.equal(availableSeats(room, now, 60), 6);
   assert.equal(roomState(room, now, 60).label, "No people detected");
-  assert.equal(availableSeats({ ...room, total_capacity: null }, now, 60), null);
-  const crowded = { ...room, latest_reading: { ...room.latest_reading, people_count: 9 } };
+  assert.equal(
+    availableSeats({ ...room, total_capacity: null }, now, 60),
+    null,
+  );
+  const crowded = {
+    ...room,
+    latest_reading: { ...room.latest_reading, people_count: 9 },
+  };
   assert.equal(availableSeats(crowded, now, 60), 0);
   assert.equal(crowded.latest_reading.people_count, 9);
   assert.equal(freshness(room, now + 60000, 60), "live");
@@ -72,8 +78,43 @@ test("zero people and over-capacity estimates retain their counts and clamp seat
 });
 
 test("sound values preserve explicit units and missing is distinct from zero", () => {
-  assert.equal(formatNoise({ noise_level: 0, noise_unit: "relative" }), "0% relative sound level");
+  assert.equal(
+    formatNoise({ noise_level: 0, noise_unit: "relative" }),
+    "0% relative sound level",
+  );
   assert.equal(formatNoise({ noise_level: 42.3, noise_unit: "dBA" }), "42 dBA");
   assert.equal(formatNoise({ noise_level: null }), "—");
-  assert.equal(noiseBand({ noise_level: 0, noise_unit: "relative" }).label, "Quiet");
+  assert.equal(
+    noiseBand({ noise_level: 0, noise_unit: "relative" }).label,
+    "Quiet",
+  );
+});
+
+test("partial metrics never invent people counts and malformed timestamps are not fresh", () => {
+  const now = Date.now();
+  const room = sampleRooms(now)[0];
+  const noiseOnly = {
+    ...room,
+    latest_reading: { ...room.latest_reading, people_count: null },
+  };
+  assert.equal(availableSeats(noiseOnly, now, 60), null);
+  assert.equal(freshness(noiseOnly, now, 60), "live");
+  assert.equal(
+    freshness(
+      {
+        ...room,
+        latest_reading: { ...room.latest_reading, measured_at: "invalid" },
+      },
+      now,
+      60,
+    ),
+    "delayed",
+  );
+});
+
+test("measurement strings and last-checked numeric timestamps share age formatting", () => {
+  const now = Date.parse("2026-11-08T12:00:00Z");
+  assert.equal(timeAgo(now - 15000, now), "15s ago");
+  assert.equal(timeAgo(new Date(now - 15000).toISOString(), now), "15s ago");
+  assert.equal(timeAgo("invalid", now), "Time unavailable");
 });

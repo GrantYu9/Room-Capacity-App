@@ -1,5 +1,12 @@
 export function freshness(room, now, staleAfterSeconds = 60) {
   if (!room.latest_reading) return "waiting";
+  if (!Number.isFinite(Date.parse(room.latest_reading.measured_at)))
+    return "delayed";
+  if (
+    !Number.isFinite(room.latest_reading.people_count) &&
+    !noiseBand(room.latest_reading)
+  )
+    return "waiting";
   if (
     room.stale ||
     now - Date.parse(room.latest_reading.measured_at) > staleAfterSeconds * 1000
@@ -48,6 +55,7 @@ export function roomState(room, now, staleAfterSeconds) {
     return { key: "waiting", label: "Awaiting a reading" };
   if (fresh === "delayed") return { key: "delayed", label: "Reading delayed" };
   const people = room.latest_reading.people_count;
+  if (!Number.isFinite(people)) return { key: "live", label: "Recent reading" };
   if (people === 0) return { key: "open", label: "No people detected" };
   if (room.total_capacity == null)
     return { key: "live", label: "Recent reading" };
@@ -59,7 +67,8 @@ export function roomState(room, now, staleAfterSeconds) {
 export function availableSeats(room, now, staleAfterSeconds) {
   if (
     freshness(room, now, staleAfterSeconds) !== "live" ||
-    room.total_capacity == null
+    room.total_capacity == null ||
+    !Number.isFinite(room.latest_reading?.people_count)
   )
     return null;
   return Math.max(0, room.total_capacity - room.latest_reading.people_count);
@@ -74,7 +83,9 @@ export function formatNoise(reading) {
 
 export function timeAgo(time, now = Date.now()) {
   if (!time) return "Not yet";
-  const seconds = Math.max(0, Math.floor((now - Date.parse(time)) / 1000));
+  const timestamp = typeof time === "number" ? time : Date.parse(time);
+  if (!Number.isFinite(timestamp)) return "Time unavailable";
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
   if (seconds < 10) return "Just now";
   if (seconds < 60) return `${seconds}s ago`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
