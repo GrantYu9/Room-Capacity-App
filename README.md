@@ -1,8 +1,8 @@
-# Sensory Atlas — a map of how places feel
+# SensoryAtlas — a little space to focus
 
 A responsive study-space dashboard for UBC: current occupancy, sound readings, room search, building filters, locally saved favourites, and recent activity. Built with React and Vite, with a Node API and a Tiger Data / TimescaleDB database.
 
-**Room metadata is collected separately from the app runtime.** `data/rooms.json` contains 68 informal learning spaces from UBC’s directory, checked on November 7, 2026 (Vancouver time). This is a directory snapshot, not a claim that these spaces have sensors or current readings. A clearly labeled sample preview contains fictional rooms; unavailable live data never falls back to sample data automatically.
+**Room metadata is collected separately from the app runtime.** `data/rooms.json` contains 68 informal learning spaces from UBC’s directory, checked on November 7, 2026 (Vancouver time). This is a directory snapshot, not a claim that these spaces have sensors or current readings. A clearly labeled demo mode contains fictional rooms; unavailable live data never falls back to sample data automatically.
 
 ## Development
 
@@ -22,7 +22,7 @@ In another terminal:
 npm run dev
 ```
 
-The frontend runs at `http://localhost:5173` and proxies `/api` to the development API on port `3100`. `npm start` also runs the standalone API on port `3000` by default. Without an API connection, the frontend shows a connection error and still offers the explicit sample preview.
+The frontend runs at `http://localhost:5173` and proxies `/api` to the development API on port `3100`. `npm start` also runs the standalone API on port `3000` by default. Without an API connection, the frontend shows a connection error and keeps the public directory browsable and offers explicit demo mode (`?demo=1`).
 
 The existing Tiger service has already been initialized for this project. `db:init` is safe to rerun. `db:check` verifies connectivity and table presence.
 
@@ -32,7 +32,7 @@ For a populated development dashboard, `npm run db:demo` adds all 68 directory s
 
 ### Community observations
 
-Open a space's details (or **Share an observation** in the unmonitored directory) to submit an optional headcount **or** approximate percentage full, and/or a quiet/moderate/lively noise impression. Zero is a valid observation. Sample preview does not submit reports. `POST /api/reports` accepts `room_id`, optional `people_count` (integer 0–10,000), `occupancy_percent` (0–100), and `noise_band` (`quiet`, `moderate`, `lively`). At least one measurement is required; count and percentage are mutually exclusive. Observation times are assigned by the server. Rooms must already be imported into the database.
+Open a space's details in the unified directory to submit an optional headcount **or** approximate percentage full, and/or a quiet/moderate/lively noise impression. Zero is a valid observation. Sample preview does not submit reports. `POST /api/reports` accepts `room_id`, optional `people_count` (integer 0–10,000), `occupancy_percent` (0–100), and `noise_band` (`quiet`, `moderate`, `lively`). At least one measurement is required; count and percentage are mutually exclusive. Observation times are assigned by the server. Rooms must already be imported into the database.
 
 Run `npm run db:reports` once on an existing database (new `db:init` runs include it), and set a private `REPORT_SECRET` of at least 32 random characters in `.env.local` and in hosting environment settings. Do not prefix it with `VITE_`. A missing secret disables report submissions. The API and migration preserve sensor history; `/api/readings` continues to return original sensor measurements. `/api/rooms` adds an `estimate` object with independent occupancy/noise estimates and a non-identifying report summary. API responses never expose reporter or network hashes.
 
@@ -41,8 +41,8 @@ Reports expire from estimates after 15 minutes. Only the latest observation per 
 Abuse controls are deliberately conservative heuristics, not calibrated statistical confidence or proof of distinct people. Anonymous reporting cannot stop coordinated users on multiple networks. Shared campus Wi-Fi does not affect report eligibility or aggregation weight. Counts above twice published capacity plus 10 are rejected. Database locks enforce one submission per browser/room per five minutes, six per browser per ten minutes, and forty per network per ten minutes even across concurrent requests. Server-signed, HttpOnly, SameSite cookies and keyed network hashes discourage cookie resets; IPv6 privacy addresses share a /64 network bucket. The local server ignores forwarded IP headers. Vercel uses its platform-provided `x-vercel-forwarded-for` header, as described in [Vercel's request-header documentation](https://vercel.com/docs/headers/request-headers). Keep this trust setting limited to Vercel. Neither raw IP addresses nor cookie IDs are stored in the reporting table. Report rows remain for abuse auditing after their estimation window; no automatic deletion job is installed.
 
 - Polls room data every 10 seconds, with a 12-second request timeout and a manual retry action.
-- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases shared by monitored and unmonitored search. Room numbers stay exact. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
-- Favourites are saved in the visitor's browser. Counts reflect only rooms in the current live/sample view.
+- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases for the unified directory. Room numbers stay exact. All listed spaces share one search and filter set. Recent readings appear first by default. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
+- Favourites are saved in the visitor's browser. Live and demo favourites are stored separately. Existing live favourites are preserved.
 - Missing capacity is **unknown**, never zero. Available seats are calculated only from fresh readings and known capacity. Counts over capacity are preserved.
 - Delayed readings are excluded from current availability and people totals. The API's `stale_after_seconds` controls freshness.
 - Noise retains its original unit. Relative readings are 0–1; calibrated dBA readings are 0–160. UI noise bands are approximate and are not a calibration or standards claim.

@@ -2,6 +2,8 @@ export function freshness(room, now, staleAfterSeconds = 60) {
   const estimate = room.estimate?.occupancy;
   if (estimate && now < Date.parse(estimate.expires_at)) return 'live';
   if (!room.latest_reading) return "waiting";
+  if (!Number.isFinite(Date.parse(room.latest_reading.measured_at))) return "delayed";
+  if (!Number.isFinite(room.latest_reading.people_count) && !noiseBand(room.latest_reading)) return "waiting";
   if (hasStaticDemo(room)) return 'demo';
   if (
     room.stale ||
@@ -17,6 +19,12 @@ export function hasStaticDemo(room) {
 
 export function hasDisplayedOccupancy(room, now, staleAfterSeconds = 60) {
   return ['live', 'demo'].includes(freshness(room, now, staleAfterSeconds));
+}
+
+export function hasRecentReading(room, now, staleAfterSeconds = 60) {
+  const noise = room.estimate?.noise;
+  return freshness(room, now, staleAfterSeconds) === 'live' ||
+    Boolean(noise && now < Date.parse(noise.expires_at) && noiseBand(noise));
 }
 
 export function occupancyReading(room, now = Date.now()) {
@@ -76,7 +84,7 @@ export function roomState(room, now, staleAfterSeconds) {
   if (fresh === "delayed") return { key: "delayed", label: "Reading delayed" };
   if (fresh === 'demo') return { key: 'live', label: 'Static demo data' };
   const people = occupancyReading(room, now)?.people_count;
-  if (people == null) return { key: 'live', label: 'Approximate fullness reported' };
+  if (!Number.isFinite(people)) return { key: 'live', label: occupancyReading(room, now)?.fraction != null ? 'Approximate fullness reported' : 'Recent reading' };
   if (people === 0) return { key: "open", label: "No people detected" };
   if (room.total_capacity == null)
     return { key: "live", label: "Recent reading" };
@@ -92,7 +100,7 @@ export function availableSeats(room, now, staleAfterSeconds) {
   )
     return null;
   const people = occupancyReading(room, now)?.people_count;
-  return people == null ? null : Math.max(0, room.total_capacity - people);
+  return Number.isFinite(people) ? Math.max(0, room.total_capacity - people) : null;
 }
 
 export function formatNoise(reading) {
@@ -105,7 +113,9 @@ export function formatNoise(reading) {
 
 export function timeAgo(time, now = Date.now()) {
   if (!time) return "Not yet";
-  const seconds = Math.max(0, Math.floor((now - Date.parse(time)) / 1000));
+  const timestamp = typeof time === "number" ? time : Date.parse(time);
+  if (!Number.isFinite(timestamp)) return "Time unavailable";
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
   if (seconds < 10) return "Just now";
   if (seconds < 60) return `${seconds}s ago`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;

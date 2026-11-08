@@ -68,59 +68,60 @@ async function noOverflow(page) {
   ).toBe(true);
 }
 
-test("live spaces show current data, preserve unknown metadata and open activity", async ({
+const card = (page, name) =>
+  page
+    .getByRole("article")
+    .filter({ has: page.getByRole("heading", { name, exact: true }) });
+const filter = (page, name) =>
+  page
+    .getByRole("group", { name: "Filter spaces" })
+    .getByRole("button", { name });
+
+test("SensoryAtlas opens in the directory with recent metrics and accessible details", async ({
   page,
 }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await mockRooms(page);
   await page.goto("/");
+  await expect(page).toHaveTitle(/SensoryAtlas/);
   await expect(
-    page.getByRole("heading", { name: "Find a space that feels right." }),
+    page.getByRole("heading", { name: "Find a quiet spot at UBC." }),
   ).toBeVisible();
-  await expect(page.getByRole("article")).toHaveCount(3);
-  const reading = page.getByRole("article").filter({
-    has: page.getByRole("heading", { name: "Reading Room", exact: true }),
+  await expect(page.getByRole("article").first()).toContainText("Group Studio");
+  await expect(card(page, "Reading Room")).toContainText("About 9 seats free");
+  await expect(card(page, "Reading Room")).toContainText("Quiet");
+  await expect(
+    page.getByText("2 of 71 listed spaces have recent readings."),
+  ).toBeVisible();
+  const open = card(page, "Reading Room").getByRole("button", {
+    name: "View Reading Room",
   });
-  await expect(reading.getByText("9 seats")).toBeVisible();
-  const pending = page.getByRole("article").filter({
-    has: page.getByRole("heading", { name: "Pending Room", exact: true }),
-  });
-  await expect(pending.getByText("Location not listed yet")).toBeVisible();
-  await expect(pending.getByText("Awaiting a reading")).toBeVisible();
-  await reading.getByRole("button", { name: "View Reading Room" }).click();
+  await open.click();
   const dialog = page.getByRole("dialog", { name: "Reading Room" });
-  await expect(dialog).toBeVisible();
   await expect(
     dialog.getByRole("img", { name: /People count over time, 2 readings/ }),
   ).toBeVisible();
-  await noOverflow(page);
+  await page.keyboard.press("Tab");
+  await expect(dialog.locator(":focus")).toHaveCount(1);
   await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
+  await expect(open).toBeFocused();
+  await noOverflow(page);
   expect(errors).toEqual([]);
 });
 
-test("search, availability, quiet and building filters work together", async ({
+test("search, quick filters, buildings and clear actions narrow the same directory", async ({
   page,
 }) => {
   await mockRooms(page);
   await page.goto("/");
-  await expect(page.getByRole("article")).toHaveCount(3);
-  await page
-    .getByRole("searchbox", { name: "Search study spaces" })
-    .fill("studio");
+  const search = page.getByRole("searchbox", { name: "Search study spaces" });
+  await search.fill("studio");
   await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(
-    page.getByRole("heading", { name: "Group Studio", exact: true }),
-  ).toBeVisible();
   await page.getByRole("button", { name: "Clear search" }).click();
-  const filters = page.getByRole("group", { name: "Filter spaces" });
-  await filters.getByRole("button", { name: /Space available/ }).click();
+  await filter(page, /Seats available/).click();
   await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(
-    page.getByRole("heading", { name: "Reading Room", exact: true }),
-  ).toBeVisible();
-  await filters.getByRole("button", { name: /Quiet spaces/ }).click();
+  await filter(page, /Quiet/).click();
   await expect(page.getByRole("article")).toHaveCount(1);
   await page
     .getByRole("combobox", { name: "Building", exact: true })
@@ -128,12 +129,14 @@ test("search, availability, quiet and building filters work together", async ({
   await expect(
     page.getByRole("heading", { name: "No spaces match just yet." }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Show all spaces/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(3);
+  await page.getByRole("button", { name: /Clear filters/ }).click();
+  await expect(page.getByRole("article")).toHaveCount(12);
   await noOverflow(page);
 });
 
-test("saved spaces persist after reloading", async ({ page }) => {
+test("live and demo saves persist independently and demo deep links work", async ({
+  page,
+}) => {
   await mockRooms(page);
   await page.goto("/");
   await page
@@ -143,142 +146,193 @@ test("saved spaces persist after reloading", async ({ page }) => {
     .getByRole("button", { name: "Saved spaces (1)", exact: true })
     .click();
   await expect(page.getByRole("article")).toHaveCount(1);
+  await page.getByRole("button", { name: "Demo mode", exact: true }).click();
+  await expect(page).toHaveURL(/demo=1/);
+  await expect(page.getByRole("article")).toHaveCount(6);
+  await expect(
+    page.getByRole("button", { name: "Saved spaces", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Save The Reading Room", exact: true })
+    .click();
   await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Unsave The Reading Room", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "View The Reading Room", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText(
+    "Demo mode · fictional sample data",
+  );
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Return to live mode", exact: false })
+    .click();
   await page
     .getByRole("button", { name: "Saved spaces (1)", exact: true })
     .click();
   await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(
-    page.getByRole("button", { name: "Unsave Reading Room", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("article")).toContainText("Reading Room");
 });
 
-test("sample view is explicit, fictional and does not inflate live favourites", async ({
-  page,
-}) => {
-  await mockRooms(page, [rooms()[2]]);
-  await page.goto("/");
-  await expect(page.getByRole("article")).toHaveCount(1);
-  await page.getByRole("button", { name: /Explore sample spaces/ }).click();
-  await expect(
-    page.getByText("These rooms and readings are fictional examples.", {
-      exact: false,
-    }),
-  ).toBeVisible();
-  await expect(page.getByRole("article")).toHaveCount(6);
-  await page
-    .getByRole("button", { name: "Save The Reading Room", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Saved spaces (1)", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: /Back to monitored rooms/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(1);
-  await expect(
-    page.getByRole("button", { name: "Saved spaces", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "The Reading Room", exact: true }),
-  ).toHaveCount(0);
-});
-
-test("a failed API request shows an error and retry recovers without demo fallback", async ({
+test("failed initial load retains the public directory and retry recovers", async ({
   page,
 }) => {
   let healthy = false;
   await page.route("**/api/rooms*", (route) =>
     healthy
       ? route.fulfill({ json: { rooms: rooms() } })
-      : route.fulfill({
-          status: 503,
-          json: { error: "Database temporarily unavailable." },
-        }),
+      : route.fulfill({ status: 503, json: {} }),
   );
   await page.goto("/");
   await expect(page.getByRole("alert")).toContainText(
-    "We couldn’t load monitored spaces",
+    "Couldn’t load study spaces",
   );
-  await expect(page.getByRole("article")).toHaveCount(0);
-  await expect(
-    page.getByText("fictional examples", { exact: false }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("article")).toHaveCount(12);
+  await expect(page.getByRole("article").first()).toContainText(
+    "No live readings",
+  );
   healthy = true;
-  await page.getByRole("button", { name: "Retry", exact: false }).click();
-  await expect(page.getByRole("article")).toHaveCount(3);
+  await page.getByRole("button", { name: /Retry/ }).click();
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(
+    page.getByText("2 of 71 listed spaces have recent readings."),
+  ).toBeVisible();
 });
 
-test("a stalled request times out and can be retried", async ({ page }) => {
-  await page.clock.install();
-  let healthy = false;
-  await page.route("**/api/rooms*", (route) => {
-    if (healthy) return route.fulfill({ json: { rooms: rooms() } });
-  });
-  await page.goto("/");
-  await expect(page.getByRole("status")).toContainText("Connecting");
-  await page.clock.fastForward(13000);
-  await expect(page.getByRole("alert")).toBeVisible();
-  healthy = true;
-  await page.getByRole("button", { name: "Retry", exact: false }).click();
-  await expect(page.getByRole("article")).toHaveCount(3);
-});
-
-test("outdated readings are excluded from current occupancy and available filters", async ({
+test("zero counts, missing metrics, unknown capacity and over-capacity readings stay distinct", async ({
   page,
 }) => {
-  const data = rooms();
-  data[0].latest_reading.measured_at = new Date(
-    Date.now() - 120000,
-  ).toISOString();
-  await mockRooms(page, [data[0]]);
+  const [base] = rooms();
+  await mockRooms(page, [
+    {
+      ...base,
+      name: "Zero Room",
+      room_id: "zero",
+      latest_reading: {
+        ...base.latest_reading,
+        people_count: 0,
+        noise_level: 0,
+      },
+    },
+    { ...base, name: "Unknown Room", room_id: "unknown", total_capacity: null },
+    {
+      ...base,
+      name: "Over Room",
+      room_id: "over",
+      latest_reading: {
+        ...base.latest_reading,
+        people_count: 15,
+        noise_level: 42,
+        noise_unit: "dBA",
+      },
+    },
+    {
+      ...base,
+      name: "Noise Only",
+      room_id: "noise",
+      latest_reading: { ...base.latest_reading, people_count: null },
+    },
+    {
+      ...base,
+      name: "Count Only",
+      room_id: "count",
+      latest_reading: { ...base.latest_reading, noise_level: null },
+    },
+  ]);
   await page.goto("/");
-  await expect(
-    page.getByRole("article").getByText("Reading delayed"),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("article").getByText("Showing no current occupancy"),
-  ).toBeVisible();
+  await expect(card(page, "Zero Room")).toContainText("About 12 seats free");
+  await expect(card(page, "Zero Room")).toContainText(
+    "About 0 people measured",
+  );
+  await expect(card(page, "Unknown Room")).toContainText("About 3 people");
+  await expect(card(page, "Unknown Room")).toContainText("Capacity unknown");
+  await expect(card(page, "Over Room")).toContainText("About 0 seats free");
+  await expect(card(page, "Over Room")).toContainText(
+    "About 15 people measured",
+  );
+  await expect(card(page, "Over Room")).toContainText("42 dBA");
+  await expect(card(page, "Noise Only")).toContainText("Occupancy unavailable");
+  await expect(card(page, "Count Only")).toContainText("Noise unavailable");
   await page
-    .getByRole("group", { name: "Filter spaces" })
-    .getByRole("button", { name: /Space available/ })
-    .click();
-  await expect(page.getByRole("article")).toHaveCount(0);
+    .getByRole("combobox", { name: "Sort spaces" })
+    .selectOption("seats");
+  await expect(page.getByRole("article").first()).toContainText("Zero Room");
+  await filter(page, /Seats available/).click();
+  await expect(page.getByRole("article")).toHaveCount(2);
+  await noOverflow(page);
 });
 
-test("help dialog and sample layout work without horizontal overflow", async ({
+test("failed refresh ages cached data, excludes stale metrics, and recovers in an open detail", async ({
+  page,
+}) => {
+  await page.clock.install();
+  let healthy = true;
+  const data = [rooms()[0]];
+  await page.route("**/api/rooms*", (route) =>
+    healthy
+      ? route.fulfill({ json: { rooms: data, stale_after_seconds: 60 } })
+      : route.fulfill({ status: 503, json: {} }),
+  );
+  await page.route("**/api/readings?*", (route) =>
+    route.fulfill({ json: { readings: [] } }),
+  );
+  await page.goto("/");
+  await page.getByRole("searchbox").fill("Reading Room");
+  await page.getByRole("button", { name: "View Reading Room" }).click();
+  healthy = false;
+  await page.clock.fastForward(71000);
+  await expect(page.getByRole("dialog")).toContainText("Reading delayed");
+  await page.keyboard.press("Escape");
+  await expect(card(page, "Reading Room")).toContainText("Last measured");
+  await expect(page.getByRole("alert")).toContainText("Couldn’t refresh");
+  await filter(page, /Quiet/).click();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  healthy = true;
+  data[0].latest_reading = {
+    ...data[0].latest_reading,
+    measured_at: await page.evaluate(() => new Date().toISOString()),
+    noise_level: 0.8,
+  };
+  await page.getByRole("button", { name: /Retry/ }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await filter(page, /All/).click();
+  await page.getByRole("button", { name: "View Reading Room" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Lively");
+  data[0].latest_reading = { ...data[0].latest_reading, noise_level: 0.1 };
+  await page.clock.fastForward(11000);
+  await expect(page.getByRole("dialog")).toContainText("Quiet");
+});
+
+test("history errors recover locally and empty history leaves room details usable", async ({
+  page,
+}) => {
+  await mockRooms(page);
+  let failed = true;
+  await page.route("**/api/readings?*", (route) =>
+    failed
+      ? route.fulfill({ status: 503, json: {} })
+      : route.fulfill({ json: { readings: [] } }),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "View Reading Room" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("Occupancy history couldn’t be loaded.");
+  failed = false;
+  await dialog.getByRole("button", { name: /Try again/ }).click();
+  await expect(dialog).toContainText("No occupancy history yet.");
+  await expect(
+    dialog.getByRole("button", { name: /Save this space/ }),
+  ).toBeVisible();
+});
+
+test("live, demo and details pass accessibility checks and render at increased zoom", async ({
   page,
 }, testInfo) => {
   await mockRooms(page);
   await page.goto("/");
-  await page.getByRole("button", { name: "How it works", exact: true }).click();
-  await expect(
-    page.getByRole("dialog", { name: "How Sensory Atlas works" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Close dialog" }).click();
-  await page.getByRole("button", { name: /Explore sample spaces/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(6);
-  await page.evaluate(() => document.fonts.ready);
-  await noOverflow(page);
-  await page
-    .getByRole("heading", { name: "Find a space that feels right." })
-    .scrollIntoViewIfNeeded();
-  await page.evaluate(() => {
-    document.activeElement?.blur();
-    window.scrollTo(0, 0);
-  });
-  await page.screenshot({
-    path: testInfo.outputPath(`room-${testInfo.project.name}.png`),
-    fullPage: true,
-    animations: "disabled",
-  });
-});
-
-test("live, sample and detail views pass automated accessibility checks", async ({
-  page,
-}) => {
-  await mockRooms(page);
-  await page.goto("/");
-  await expect(page.getByRole("article")).toHaveCount(3);
+  await expect(page.getByRole("article")).toHaveCount(12);
   async function check() {
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa"])
@@ -294,125 +348,39 @@ test("live, sample and detail views pass automated accessibility checks", async 
     ).toEqual([]);
   }
   await check();
-  await page.getByRole("button", { name: /Explore sample spaces/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(6);
+  await page.getByRole("button", { name: "Demo mode", exact: true }).click();
   await check();
-  await page
-    .getByRole("button", { name: "View The Reading Room", exact: true })
-    .click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("directory.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "View The Reading Room" }).click();
   await check();
-});
-
-test("zero, unknown capacity and over-capacity readings stay distinct", async ({ page }) => {
-  const [base] = rooms();
-  const data = [
-    { ...base, room_id: "zero", name: "Zero Room", latest_reading: { ...base.latest_reading, people_count: 0, noise_level: 0 } },
-    { ...base, room_id: "unknown", name: "Unknown Room", total_capacity: null },
-    { ...base, room_id: "over", name: "Over Room", latest_reading: { ...base.latest_reading, people_count: 15, noise_level: 42, noise_unit: "dBA" } },
-  ];
-  await mockRooms(page, data);
-  await page.goto("/");
-  const card = (name) => page.getByRole("article").filter({ has: page.getByRole("heading", { name, exact: true }) });
-  await expect(card("Zero Room").getByText("No people detected")).toBeVisible();
-  await expect(card("Zero Room").getByText("12 seats")).toBeVisible();
-  await expect(card("Zero Room").getByText("0% relative sound level")).toBeVisible();
-  await expect(card("Unknown Room").getByText("Capacity unknown · available seats unknown")).toBeVisible();
-  await expect(card("Over Room").getByText("0 estimated seats available")).toBeVisible();
-  await expect(card("Over Room").getByRole("progressbar")).toHaveAttribute("aria-valuenow", "15");
-  await expect(card("Over Room").getByText("42 dBA")).toBeVisible();
-  await page.getByRole("combobox", { name: "Sort spaces" }).selectOption("seats");
-  await expect(page.getByRole("article").first()).toContainText("Zero Room");
-  await page.getByRole("button", { name: "View Unknown Room" }).click();
-  await expect(page.getByRole("dialog").getByText("Capacity unknown", { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("details.png") });
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => (document.documentElement.style.zoom = "2"));
   await noOverflow(page);
 });
 
-test("reachable API without recent readings does not imply reporting sensors", async ({ page }) => {
-  const data = rooms();
-  data[0].latest_reading.measured_at = new Date(Date.now() - 120000).toISOString();
-  await mockRooms(page, [data[0], data[2]]);
-  await page.goto("/");
-  await expect(page.getByRole("status")).toContainText("API reachable");
-  const summary = page.getByRole("region", { name: "Study space summary" });
-  await expect(summary).toContainText("0 of 2 rooms have recent readings");
-  await expect(summary).toContainText("No recent readings");
-  await page.getByRole("group", { name: "Filter spaces" }).getByRole("button", { name: /Quiet spaces/ }).click();
-  await expect(page.getByRole("article")).toHaveCount(0);
-});
-
-test("initial loading, empty API and offline sample preview are distinct", async ({ page }) => {
-  let release;
-  const gate = new Promise((resolve) => { release = resolve; });
-  await page.route("**/api/rooms*", async (route) => {
-    await gate;
-    await route.fulfill({ json: { rooms: [] } });
+test("loading and timed out requests stay distinct from demo mode", async ({
+  page,
+}) => {
+  await page.clock.install();
+  let healthy = false;
+  await page.route("**/api/rooms*", (route) => {
+    if (healthy) return route.fulfill({ json: { rooms: [] } });
   });
   await page.goto("/");
   await expect(page.getByLabel("Loading spaces")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Try sample preview", exact: true })).toBeVisible();
-  release();
-  await expect(page.getByRole("heading", { name: "No monitored rooms yet." })).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("API reachable");
-  await page.unroute("**/api/rooms*");
-  await page.route("**/api/rooms*", (route) => route.fulfill({ status: 503, json: {} }));
-  await page.reload();
-  await expect(page.getByRole("heading", { name: "Monitored spaces unavailable." })).toBeVisible();
-  await page.getByRole("button", { name: "Try sample preview", exact: true }).click();
-  await expect(page.getByRole("region", { name: "Study space summary" })).toContainText("Fictional sample data");
-  await expect(page.getByRole("article").first()).toContainText("Fictional sample data");
-  await page.getByRole("button", { name: "View The Reading Room", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText("Fictional sample data");
-  await expect(page.getByRole("dialog")).toContainText("Last measured");
-});
-
-test("failed refresh retains its successful check time while cached readings age", async ({ page }) => {
-  await page.clock.install();
-  let healthy = true;
-  let data = [rooms()[0]];
-  await page.route("**/api/rooms*", (route) => healthy
-    ? route.fulfill({ json: { rooms: data, stale_after_seconds: 60 } })
-    : route.fulfill({ status: 503, json: {} }));
-  await page.goto("/");
-  await expect(page.getByRole("article")).toHaveCount(1);
-  healthy = false;
-  await page.clock.fastForward(11000);
-  await expect(page.getByRole("alert")).toContainText("Last successful check:");
-  await page.clock.fastForward(60000);
-  await expect(page.getByRole("article")).toContainText("Reading delayed");
-  await expect(page.getByRole("region", { name: "Study space summary" })).toContainText("0 of 1 rooms have recent readings");
+  await page.clock.fastForward(13000);
+  await expect(page.getByRole("alert")).toBeVisible();
   healthy = true;
-  data[0].latest_reading.measured_at = await page.evaluate(() => new Date().toISOString());
-  await page.getByRole("button", { name: "Retry", exact: false }).click();
-  await expect(page.getByRole("alert")).toHaveCount(0);
-  await expect(page.getByRole("article")).toContainText("Estimated seats available");
-  await expect(page.getByRole("article")).not.toContainText("Fictional");
-});
-
-test("history empty and error states recover and dialog returns keyboard focus", async ({ page }) => {
-  await mockRooms(page);
-  let failed = true;
-  await page.route("**/api/readings?*", (route) => failed
-    ? route.fulfill({ status: 503, json: {} })
-    : route.fulfill({ json: { readings: [] } }));
-  await page.goto("/");
-  const open = page.getByRole("button", { name: "View Reading Room", exact: true });
-  await open.focus();
-  await page.keyboard.press("Enter");
-  const dialog = page.getByRole("dialog");
-  await expect(dialog.getByRole("heading", { name: "Recent occupancy" })).toBeVisible();
-  await expect(dialog).toContainText("Up to 100 recent readings");
-  await expect(dialog).toContainText("Occupancy history couldn’t be loaded.");
-  failed = false;
-  await dialog.getByRole("button", { name: /Try again/ }).click();
-  await expect(dialog).toContainText("No occupancy history yet.");
-  await page.keyboard.press("Tab");
-  await expect(dialog.locator(":focus")).toHaveCount(1);
-  await noOverflow(page);
-  await page.keyboard.press("Escape");
-  await expect(dialog).toHaveCount(0);
-  await expect(open).toBeFocused();
-  await page.getByRole("button", { name: "How it works", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText("roughly every 10 seconds");
-  await expect(page.getByRole("dialog")).toContainText("Each measurement has its own timestamp");
+  await page.getByRole("button", { name: /Retry/ }).click();
+  await expect(page.getByRole("status")).toContainText("Connected");
+  await expect(
+    page.getByText("0 of 68 listed spaces have recent readings."),
+  ).toBeVisible();
+  await expect(page.getByRole("article").first()).toContainText(
+    "No live readings",
+  );
 });
