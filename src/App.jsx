@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
-  Asterisk,
   AudioLines,
-  BookOpen,
   ChevronDown,
-  Clock3,
   DoorOpen,
   Heart,
   Info,
@@ -33,109 +29,25 @@ import {
 import { useRooms, useSavedRooms } from "./useRooms.js";
 import { fetchJson } from "./api.js";
 import directoryRooms from "../data/rooms.json";
-import UnmonitoredSpaces from "./UnmonitoredSpaces.jsx";
-import { splitRoomSources } from "./roomSources.js";
+import roomPhotos from "../data/room-images.json";
+import { mergeDirectory } from "./roomSources.js";
 import { matchesRoomSearch } from "./roomSearch.js";
 
 const filters = [
-  { id: "all", label: "All spaces" },
-  { id: "available", label: "Space available" },
-  { id: "quiet", label: "Quiet spaces" },
+  { id: "all", label: "All" },
+  { id: "available", label: "Seats available" },
+  { id: "quiet", label: "Quiet" },
   { id: "saved", label: "Saved" },
 ];
 
-function Brand({ small = false }) {
+function Brand() {
   return (
-    <span className={`brand ${small ? "brand-small" : ""}`}>
+    <span className="brand">
       <span className="brand-mark">
-        <DoorOpen size={small ? 19 : 23} strokeWidth={1.7} />
+        <MapPin size={22} strokeWidth={1.7} />
       </span>
-      <span>
-        room<span className="brand-period">.</span>
-      </span>
+      SensoryAtlas<span className="brand-period">.</span>
     </span>
-  );
-}
-
-function DeskIllustration() {
-  return (
-    <svg
-      className="desk-illustration"
-      viewBox="0 0 380 280"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect x="75" y="23" width="235" height="213" rx="112" fill="#e7e8d4" />
-      <path
-        d="M159 110V40M225 111V44M91 113h204"
-        stroke="#faf9f3"
-        strokeWidth="6"
-      />
-      <circle cx="246" cy="63" r="20" fill="#e4b96c" />
-      <path
-        d="M57 233h274"
-        stroke="#d5d8c7"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M92 163h220M109 165v68M292 165v68"
-        stroke="#254e43"
-        strokeWidth="8"
-        strokeLinecap="round"
-      />
-      <rect
-        x="154"
-        y="125"
-        width="62"
-        height="38"
-        rx="4"
-        fill="#f1d7a6"
-        stroke="#b99b6c"
-        strokeWidth="2"
-      />
-      <path d="m156 151 21-14 36 14" stroke="#b99b6c" strokeWidth="2" />
-      <path
-        d="M254 160v-55l-24-17"
-        stroke="#254e43"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-      <path d="m212 82 33 19-4-29-29 10Z" fill="#254e43" />
-      <path d="m218 92-16 25 38 3-7-20" fill="#f2d59c" opacity=".55" />
-      <path
-        d="M128 209v24M176 209v24"
-        stroke="#a66a4d"
-        strokeWidth="5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M124 183c0-13 12-21 27-21 17 0 29 8 29 21v22h-56v-22Z"
-        fill="#cf8d6a"
-      />
-      <path
-        d="M121 204h61"
-        stroke="#a66a4d"
-        strokeWidth="5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M325 203c0-25-9-43-9-60M316 173c-21-1-27-17-21-29 16 3 24 16 21 29ZM318 159c18-4 24-20 17-31-14 6-21 19-17 31Z"
-        fill="#72947a"
-        stroke="#72947a"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path d="M303 201h32l-5 31h-22l-5-31Z" fill="#d7bc91" />
-      <rect x="107" y="151" width="25" height="9" rx="2" fill="#a6b5a0" />
-      <rect x="110" y="142" width="25" height="9" rx="2" fill="#e1bc7b" />
-      <path
-        d="M71 52v14m-7-7h14M324 96v10m-5-5h10"
-        stroke="#a4af88"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
 
@@ -179,7 +91,7 @@ function Modal({ title, children, onClose, wide = false }) {
 
 function HowItWorks({ onClose }) {
   return (
-    <Modal title="How room works" onClose={onClose}>
+    <Modal title="How SensoryAtlas works" onClose={onClose}>
       <span className="eyebrow">A little less guesswork</span>
       <h2>
         A good spot changes
@@ -187,8 +99,8 @@ function HowItWorks({ onClose }) {
         your whole study session.
       </h2>
       <p className="modal-intro">
-        room brings occupancy and sound readings together, so you can choose a
-        space before you head over.
+        SensoryAtlas brings occupancy and sound readings together, so you can
+        choose a space before you head over.
       </p>
       <div className="how-steps">
         <div>
@@ -233,31 +145,6 @@ function HowItWorks({ onClose }) {
   );
 }
 
-function NoiseLevel({ reading, live }) {
-  const band = live ? noiseBand(reading) : null;
-  return (
-    <div className="noise-level">
-      <span
-        className={`noise-wave ${band?.level ?? "unknown"}`}
-        aria-hidden="true"
-      >
-        <i />
-        <i />
-        <i />
-        <i />
-        <i />
-      </span>
-      <div>
-        <span className="metric-caption">
-          Sound band{reading?.noise_unit === "relative" ? " · approximate" : ""}
-        </span>
-        <strong>{band?.label ?? "No current reading"}</strong>
-      </div>
-      <span className="noise-value">{live ? formatNoise(reading) : "—"}</span>
-    </div>
-  );
-}
-
 function RoomCard({
   room,
   now,
@@ -265,108 +152,99 @@ function RoomCard({
   saved,
   onSave,
   onOpen,
-  index,
   demo,
 }) {
-  const state = roomState(room, now, staleAfterSeconds);
   const live = freshness(room, now, staleAfterSeconds) === "live";
-  const count = live ? room.latest_reading.people_count : null;
-  const capacity = room.total_capacity;
-  const percent =
-    count != null && capacity ? Math.min(100, (count / capacity) * 100) : null;
+  const reading = room.latest_reading;
+  const count =
+    live && Number.isFinite(reading?.people_count)
+      ? reading.people_count
+      : null;
   const seats = availableSeats(room, now, staleAfterSeconds);
-  const location = locationLabel(room.location);
+  const band = live ? noiseBand(reading) : null;
+  const photo = roomPhotos.images[room.catalog_id ?? room.room_id];
   return (
-    <article
-      className="room-card"
-      style={{ "--card-delay": `${Math.min(index, 8) * 45}ms` }}
-    >
-      <div className={`room-card-cover cover-${index % 4}`}>
-        <div className="cover-decoration" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <BookOpen
-          size={31}
-          strokeWidth={1.4}
-          className="cover-book"
-          aria-hidden="true"
-        />
-        <span className={`status-pill status-${state.key}`}>
-          <span />
-          {state.label}
-        </span>
-        <button
-          className={`save-button ${saved ? "is-saved" : ""}`}
-          onClick={() => onSave(room.room_id)}
-          aria-label={`${saved ? "Unsave" : "Save"} ${room.name}`}
-          aria-pressed={saved}
-        >
-          <Heart size={18} fill={saved ? "currentColor" : "none"} />
-        </button>
-      </div>
+    <article className="room-card">
       <div className="room-card-body">
-        {demo && <p className="sample-label">Fictional sample data</p>}
-        <h3>{room.name}</h3>
-        <p className="room-location">
-          <MapPin size={14} aria-hidden="true" />
-          {location || "Location not listed yet"}
-        </p>
-        <div className="occupancy-heading">
-          <span>Estimated people</span>
+        <div className="card-heading">
+          <div>
+            <h3>{room.name}</h3>
+            <p className="room-location">
+              {locationLabel(room.location) || "Location not listed yet"}
+            </p>
+          </div>
+          <button
+            className={`save-button ${saved ? "is-saved" : ""}`}
+            onClick={() => onSave(room.room_id)}
+            aria-label={`${saved ? "Unsave" : "Save"} ${room.name}`}
+            aria-pressed={saved}
+          >
+            <Heart size={19} fill={saved ? "currentColor" : "none"} />
+          </button>
+        </div>
+        {photo && (
+          <div className="room-photo">
+            <img
+              src={photo.path}
+              alt={`${room.name} study area, from UBC Learning Spaces`}
+              loading="lazy"
+              width="768"
+              height="512"
+            />
+          </div>
+        )}
+        {demo && (
+          <p className="sample-label">Demo mode · fictional sample data</p>
+        )}
+        <div className="card-metrics">
+          <div className={`card-metric noise-${band?.level ?? "unknown"}`}>
+            <AudioLines size={20} aria-hidden="true" />
+            <span>Noise level</span>
+            <strong>{band?.label ?? "Noise unavailable"}</strong>
+            {reading?.noise_unit === "dBA" && band && (
+              <small>{formatNoise(reading)}</small>
+            )}
+          </div>
+          <div className={`card-metric ${seats === 0 ? "metric-full" : ""}`}>
+            <Users size={20} aria-hidden="true" />
+            <span>{seats != null ? "Estimated seats" : "Occupancy"}</span>
+            <strong>
+              {seats != null
+                ? `About ${seats} ${seats === 1 ? "seat" : "seats"} free`
+                : count != null
+                  ? `About ${count} people`
+                  : "Occupancy unavailable"}
+            </strong>
+            <small>
+              {room.total_capacity != null
+                ? `Capacity: ${room.total_capacity} seats`
+                : "Capacity unknown"}
+            </small>
+          </div>
+        </div>
+        <div className="reading-age">
+          <span
+            className={`status-pill ${live ? "status-live" : "status-delayed"}`}
+          >
+            <span />
+            {live
+              ? "Recent reading"
+              : reading
+                ? "Reading delayed"
+                : "No live readings"}
+          </span>
           <span>
-            <strong>{count ?? "—"}</strong>
-            <span className="capacity"> / {capacity ?? "—"}</span>
-            <Users size={14} aria-hidden="true" />
+            {reading
+              ? `${live ? "Measured" : "Last measured"} ${timeAgo(reading.measured_at, now).toLowerCase()}`
+              : "Location details available"}
           </span>
         </div>
-        <div
-          className={`occupancy-track ${percent == null ? "track-unknown" : ""}`}
-          role={percent == null ? undefined : "progressbar"}
-          aria-label={percent == null ? undefined : "Room occupancy"}
-          aria-valuenow={percent == null ? undefined : count}
-          aria-valuemin={percent == null ? undefined : 0}
-          aria-valuemax={
-            percent == null ? undefined : Math.max(capacity, count)
-          }
-        >
-          <span
-            style={{ width: `${percent ?? 0}%` }}
-            className={
-              percent >= 100 ? "bar-full" : percent > 70 ? "bar-busy" : ""
-            }
-          />
-        </div>
-        <p className="seats-caption">
-          {capacity == null ? (
-            "Capacity unknown · available seats unknown"
-          ) : !live ? (
-            state.key === "waiting" ? (
-              "Waiting for the first update"
-            ) : (
-              "Showing no current occupancy"
-            )
-          ) : seats === 0 ? (
-            "0 estimated seats available"
-          ) : (
-            <>
-              Estimated <span>{seats} {seats === 1 ? "seat" : "seats"}</span> available
-            </>
-          )}
-        </p>
-        <NoiseLevel reading={room.latest_reading} live={live} />
       </div>
       <div className="room-card-footer">
-        <span
-          title={room.latest_reading
-            ? new Date(room.latest_reading.measured_at).toLocaleString()
-            : undefined}
-        >
-          <Clock3 size={12} />
-          {room.latest_reading
-            ? `Measured ${timeAgo(room.latest_reading.measured_at, now).toLowerCase()}`
-            : "No reading yet"}
+        <span>
+          {count != null
+            ? `About ${count} people measured`
+            : "Current occupancy unknown"}
         </span>
         <button onClick={() => onOpen(room)} aria-label={`View ${room.name}`}>
           View space <ArrowUpRight size={16} />
@@ -377,6 +255,13 @@ function RoomCard({
 }
 
 function ActivityChart({ readings }) {
+  readings = readings
+    .filter(
+      (reading) =>
+        Number.isFinite(reading.people_count) &&
+        Number.isFinite(Date.parse(reading.measured_at)),
+    )
+    .sort((a, b) => Date.parse(a.measured_at) - Date.parse(b.measured_at));
   if (!readings.length)
     return (
       <div className="activity-empty">
@@ -512,13 +397,23 @@ function RoomDetails({
   return (
     <Modal title={room.name} onClose={onClose} wide>
       <span className="eyebrow">
-        {demo ? "Fictional sample data" : "Your next place to focus"}
+        {demo ? "Demo mode · fictional sample data" : "Study space details"}
       </span>
       <h2>{room.name}</h2>
       <p className="detail-location">
         <MapPin size={16} />
         {location || "Location not listed yet"}
       </p>
+      {directionsUrl(room) && (
+        <a
+          className="primary-button directions-link"
+          href={directionsUrl(room)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Directions <ArrowUpRight size={16} />
+        </a>
+      )}
       <div className="detail-status">
         <span className={`status-pill status-${state.key}`}>
           <span />
@@ -538,7 +433,9 @@ function RoomDetails({
           <Users size={19} />
           <span>Estimated people</span>
           <strong>
-            {live ? room.latest_reading.people_count : "—"}
+            {live && Number.isFinite(room.latest_reading.people_count)
+              ? room.latest_reading.people_count
+              : "—"}
             <small> / {room.total_capacity ?? "—"}</small>
           </strong>
         </div>
@@ -546,7 +443,9 @@ function RoomDetails({
           <AudioLines size={20} />
           <span>Sound band · approximate</span>
           <strong>
-            {live ? noiseBand(room.latest_reading)?.label : "—"}
+            {live
+              ? (noiseBand(room.latest_reading)?.label ?? "Noise unavailable")
+              : "Noise unavailable"}
             <small>
               {live ? formatNoise(room.latest_reading) : "No current reading"}
             </small>
@@ -578,7 +477,11 @@ function RoomDetails({
       )}
       <div className="activity-heading">
         <h3>Recent occupancy</h3>
-        <span>{demo ? "Up to 100 recent readings · fictional" : "Up to 100 recent readings"}</span>
+        <span>
+          {demo
+            ? "Up to 100 recent readings · fictional"
+            : "Up to 100 recent readings"}
+        </span>
       </div>
       {history.status === "loading" ? (
         <div className="activity-empty">
@@ -614,50 +517,62 @@ function RoomDetails({
           target="_blank"
           rel="noreferrer"
         >
-          Room information source <ArrowUpRight size={14} />
+          UBC room page <ArrowUpRight size={14} />
         </a>
       )}
     </Modal>
   );
 }
 
+function directionsUrl(room) {
+  const location = room.location;
+  if (!location) return null;
+  const destination =
+    Number.isFinite(location.latitude) && Number.isFinite(location.longitude)
+      ? `${location.latitude},${location.longitude}`
+      : location.address;
+  return destination
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`
+    : null;
+}
+
 export default function App() {
   const live = useRooms();
-  const { saved, toggle } = useSavedRooms();
+  const liveSaved = useSavedRooms();
+  const demoSaved = useSavedRooms("sensoryatlas.demo.saved");
   const [now, setNow] = useState(Date.now());
-  const [demo, setDemo] = useState(false);
+  const [demo, setDemo] = useState(
+    () => new URLSearchParams(window.location.search).get("demo") === "1",
+  );
+  const { saved, toggle } = demo ? demoSaved : liveSaved;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [building, setBuilding] = useState("all");
-  const [sort, setSort] = useState("name");
+  const [sort, setSort] = useState("recommended");
+  const [limit, setLimit] = useState(12);
   const [selected, setSelected] = useState(null);
   const [how, setHow] = useState(false);
   const spacesRef = useRef(null);
   const examples = useMemo(() => sampleRooms(), [demo]);
   const clock = demo ? Date.parse(examples[0].latest_reading.measured_at) : now;
-  const sources = useMemo(() => splitRoomSources(directoryRooms, live.rooms), [live.rooms]);
-  const rooms = demo ? examples : sources.monitored;
-  const savedCount = rooms.filter((room) => saved.has(room.room_id)).length;
+  const directory = useMemo(
+    () => mergeDirectory(directoryRooms, live.rooms),
+    [live.rooms],
+  );
+  const rooms = demo ? examples : directory;
   const staleAfter = live.staleAfterSeconds;
+  const savedCount = rooms.filter((room) => saved.has(room.room_id)).length;
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => setLimit(12), [query, filter, building, sort, demo]);
   const buildings = [
-    ...new Set(rooms.map((r) => r.location?.building).filter(Boolean)),
+    ...new Set(rooms.map((room) => room.location?.building).filter(Boolean)),
   ].sort();
   const reporting = rooms.filter(
-    (r) => freshness(r, clock, staleAfter) === "live",
+    (room) => freshness(room, clock, staleAfter) === "live",
   );
-  const knownSeats = rooms
-    .map((r) => availableSeats(r, clock, staleAfter))
-    .filter((x) => x !== null);
-  const people = reporting.length
-    ? reporting.reduce((sum, r) => sum + r.latest_reading.people_count, 0)
-    : null;
-  const seats = knownSeats.length
-    ? knownSeats.reduce((sum, x) => sum + x, 0)
-    : null;
   const matchesFilter = (room, kind) =>
     kind === "all" ||
     (kind === "saved"
@@ -667,23 +582,28 @@ export default function App() {
         : freshness(room, clock, staleAfter) === "live" &&
           noiseBand(room.latest_reading)?.level === "quiet");
   const filtered = rooms
-    .filter((room) => {
-      return (
+    .filter(
+      (room) =>
         matchesRoomSearch(room, query) &&
         matchesFilter(room, filter) &&
-        (building === "all" || room.location?.building === building)
-      );
-    })
-    .sort((a, b) =>
-      sort === "seats"
-        ? (availableSeats(b, clock, staleAfter) ?? -1) -
+        (building === "all" || room.location?.building === building),
+    )
+    .sort((a, b) => {
+      if (sort === "seats")
+        return (
+          (availableSeats(b, clock, staleAfter) ?? -1) -
             (availableSeats(a, clock, staleAfter) ?? -1) ||
           a.name.localeCompare(b.name)
-        : a.name.localeCompare(b.name),
-    );
-  const currentRoom = selected
-    ? rooms.find((r) => r.room_id === selected)
-    : null;
+        );
+      if (sort === "recommended")
+        return (
+          Number(freshness(b, clock, staleAfter) === "live") -
+            Number(freshness(a, clock, staleAfter) === "live") ||
+          a.name.localeCompare(b.name)
+        );
+      return a.name.localeCompare(b.name);
+    });
+  const currentRoom = rooms.find((room) => room.room_id === selected);
   const initialLoading = !demo && live.status === "loading";
   function clearFilters() {
     setQuery("");
@@ -694,10 +614,10 @@ export default function App() {
     setDemo(value);
     clearFilters();
     setSelected(null);
-  }
-  function showSaved() {
-    setFilter("saved");
-    spacesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const url = new URL(window.location.href);
+    if (value) url.searchParams.set("demo", "1");
+    else url.searchParams.delete("demo");
+    window.history.replaceState(null, "", url);
   }
   return (
     <>
@@ -706,7 +626,7 @@ export default function App() {
       </a>
       <header className="site-header">
         <div className="nav-wrap">
-          <a className="brand-link" href="#" aria-label="room home">
+          <a className="brand-link" href="/" aria-label="SensoryAtlas home">
             <Brand />
           </a>
           <nav aria-label="Main navigation">
@@ -718,11 +638,20 @@ export default function App() {
             </button>
           </nav>
           <button
+            className="secondary-button nav-demo"
+            onClick={() => switchDemo(!demo)}
+          >
+            {demo ? "Live mode" : "Demo mode"}
+          </button>
+          <button
             className="nav-saved"
-            onClick={showSaved}
+            onClick={() => {
+              setFilter("saved");
+              spacesRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
             aria-label={`Saved spaces${savedCount ? ` (${savedCount})` : ""}`}
           >
-            <Heart size={17} />
+            <Heart size={18} />
             <span>Saved spaces</span>
             {savedCount > 0 && (
               <span className="saved-count">{savedCount}</span>
@@ -730,186 +659,57 @@ export default function App() {
           </button>
         </div>
       </header>
-      <main>
-        <section className="hero page-width" aria-labelledby="hero-title">
-          <div className="hero-copy">
+      <main className="page-width">
+        <section className="directory-header" aria-labelledby="hero-title">
+          <div>
             <span className="eyebrow">
-              <span className="tiny-star" aria-hidden="true">
-                <Asterisk size={20} />
-              </span>{" "}
-              UBC prototype · limited coverage
+              <MapPin size={15} /> UBC Vancouver · study space directory
             </span>
             <h1 id="hero-title">
-              Find a quieter
-              <br />
-              place to <em>study</em>
+              Find a quiet spot at UBC<span>.</span>
             </h1>
             <p>
-              See recent occupancy and sound readings for monitored study spaces.
-              This UBC prototype covers a limited set of rooms; estimates can
-              help you decide where to try next.
+              Less wandering. More focusing. Check recent noise and occupancy
+              readings before you head over.
             </p>
-            <div className="hero-actions">
-              <a href="#spaces" className="primary-button">
-                Browse study spaces <ArrowDown size={16} />
-              </a>
-              <button
-                className="secondary-button"
-                onClick={() => {
-                  switchDemo(true);
-                  spacesRef.current?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Try sample preview <ArrowUpRight size={16} />
-              </button>
-            </div>
-          </div>
-          <div className="hero-art">
-            <div className="art-note">
-              <span className="note-dot" />A good spot makes all the difference.
-            </div>
-            <DeskIllustration />
-            <span className="art-signature">Make yourself at home.</span>
           </div>
         </section>
         <section
-          className="summary-section page-width"
-          aria-label="Study space summary"
-        >
-          <div className="summary-intro">
-            <span className="campus-label">
-              <MapPin size={14} />
-              {demo ? "Fictional sample data" : "Monitored UBC spaces"}
-            </span>
-            <h2>{demo ? "Sample preview" : "Limited coverage"}</h2>
-          </div>
-          <div className="summary-stat">
-            <span className="stat-icon">
-              <BookOpen size={20} strokeWidth={1.6} />
-            </span>
-            <div>
-              <strong>
-                {!demo && !live.checkedAt ? "—" : String(rooms.length).padStart(2, "0")}
-              </strong>
-              <span>{demo ? "Fictional sample rooms" : "Monitored rooms"}</span>
-              <small>
-                {initialLoading
-                  ? "Checking for readings…"
-                  : !demo && !live.checkedAt
-                    ? "Coverage unavailable"
-                    : `${reporting.length} of ${rooms.length} rooms have recent readings`}
-              </small>
-            </div>
-          </div>
-          <div className="summary-stat">
-            <span className="stat-icon">
-              <DoorOpen size={21} strokeWidth={1.6} />
-            </span>
-            <div>
-              <strong>{seats ?? "—"}</strong>
-              <span>{demo ? "Sample estimated seats" : "Estimated available seats"}</span>
-              <small>
-                {knownSeats.length
-                  ? `Across ${knownSeats.length} reporting ${knownSeats.length === 1 ? "space" : "spaces"}`
-                  : "Waiting for capacity and readings"}
-              </small>
-            </div>
-          </div>
-          <div className="summary-stat">
-            <span className="stat-icon">
-              <Users size={21} strokeWidth={1.6} />
-            </span>
-            <div>
-              <strong>{people ?? "—"}</strong>
-              <span>{demo ? "Sample estimated people" : "Estimated people"}</span>
-              <small>
-                {reporting.length
-                  ? `Across ${reporting.length} recent ${reporting.length === 1 ? "space" : "spaces"}`
-                  : "No recent readings"}
-              </small>
-            </div>
-          </div>
-        </section>
-        <section
-          className="spaces-section page-width"
+          className="spaces-section"
           ref={spacesRef}
           id="spaces"
-          aria-labelledby="spaces-heading"
+          aria-label="Study spaces"
         >
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow section-eyebrow">
-                Your next favourite corner
-              </span>
-              <h2 id="spaces-heading">
-                Find your space<span>.</span>
-              </h2>
-            </div>
-            <span
-              className={`connection-status ${demo ? "connection-demo" : live.status}`}
-              role="status"
-            >
-              <span className="connection-dot" />
-              {demo
-                ? "Sample preview · fictional"
-                : live.status === "ok"
-                  ? "API reachable · checks every ~10s"
-                  : live.status === "error"
-                    ? "API refresh failed · retrying"
-                    : "Connecting to API"}
-            </span>
-          </div>
           {demo && (
             <div className="demo-banner">
-              <div>
-                <Info size={18} />
-                <p>
-                  <strong>You’re exploring sample spaces.</strong> These rooms
-                  and readings are fictional examples.
-                </p>
-              </div>
+              <Info size={19} />
+              <p>
+                <strong>Demo mode.</strong> These rooms and readings are
+                fictional examples. Coverage is simulated.
+              </p>
               <button onClick={() => switchDemo(false)}>
-                Back to monitored rooms <ArrowRight size={15} />
+                Return to live mode <ArrowRight size={16} />
               </button>
             </div>
           )}
-          <div className="search-row">
-            <div className="search-field">
-              <Search size={20} />
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                aria-label="Search study spaces"
-                placeholder="Search a room, building, alias, or address"
-              />
-              {query && (
-                <button
-                  className="clear-search"
-                  aria-label="Clear search"
-                  onClick={() => setQuery("")}
-                >
-                  <X size={17} />
-                </button>
-              )}
-              <span className="search-key" aria-hidden="true">
-                Find your corner
-              </span>
-            </div>
-            <label className="select-field">
-              <MapPin size={16} />
-              <span className="sr-only">Building</span>
-              <select
-                value={building}
-                onChange={(event) => setBuilding(event.target.value)}
+          <div className="search-field">
+            <Search size={20} aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Search study spaces"
+              placeholder="Search by building or room"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            {query && (
+              <button
+                className="clear-search"
+                aria-label="Clear search"
+                onClick={() => setQuery("")}
               >
-                <option value="all">All buildings</option>
-                {buildings.map((name) => (
-                  <option key={name}>{name}</option>
-                ))}
-              </select>
-              <ChevronDown size={15} />
-            </label>
+                <X size={19} />
+              </button>
+            )}
           </div>
           <div className="filter-row">
             <div
@@ -924,8 +724,14 @@ export default function App() {
                   aria-pressed={filter === item.id}
                   onClick={() => setFilter(item.id)}
                 >
-                  {item.id === "saved" && <Heart size={13} />}
-                  <span>{item.label}</span>
+                  {item.id === "quiet" ? (
+                    <AudioLines size={16} />
+                  ) : item.id === "available" ? (
+                    <Users size={16} />
+                  ) : item.id === "saved" ? (
+                    <Heart size={16} />
+                  ) : null}
+                  {item.label}
                   <span className="filter-count">
                     {
                       rooms.filter((room) => matchesFilter(room, item.id))
@@ -935,49 +741,98 @@ export default function App() {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="secondary-controls">
+            <label className="select-field">
+              <MapPin size={16} />
+              <span className="sr-only">Building</span>
+              <select
+                value={building}
+                onChange={(event) => setBuilding(event.target.value)}
+              >
+                <option value="all">All buildings</option>
+                {buildings.map((name) => (
+                  <option key={name}>{name}</option>
+                ))}
+              </select>
+              <ChevronDown size={15} />
+            </label>
             <label className="sort-field">
-              <SlidersHorizontal size={14} />
+              <SlidersHorizontal size={16} />
               <span className="sr-only">Sort spaces</span>
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
               >
+                <option value="recommended">Recent readings first</option>
                 <option value="name">Name: A–Z</option>
                 <option value="seats">Most seats available</option>
               </select>
-              <ChevronDown size={13} />
+              <ChevronDown size={15} />
             </label>
+          </div>
+          <div className="coverage-row">
+            <div>
+              <h2>
+                Study spaces <span>{filtered.length}</span>
+              </h2>
+              <p>
+                {demo ? "Simulated: " : ""}
+                {reporting.length} of {rooms.length} listed spaces have recent
+                readings.
+              </p>
+            </div>
+            <div className={`connection-status ${live.status}`} role="status">
+              <span className="connection-dot" />
+              {demo
+                ? "Demo mode · simulated"
+                : live.status === "ok"
+                  ? "Connected"
+                  : live.status === "error"
+                    ? "Connection interrupted"
+                    : "Connecting…"}
+            </div>
           </div>
           {!demo && live.status === "error" && (
             <div className="error-banner" role="alert">
-              <WifiOff size={18} />
+              <WifiOff size={19} />
               <p>
                 {live.checkedAt
-                  ? `We couldn’t refresh the latest data. Last successful check: ${new Date(live.checkedAt).toLocaleString()} (${timeAgo(live.checkedAt, now).toLowerCase()}). Cached readings may be out of date.`
-                  : "We couldn’t load monitored spaces. Retry or try the sample preview."}
+                  ? "Couldn’t refresh readings. Showing the last successful result; measurements continue to age."
+                  : "Couldn’t load study spaces. You can still browse the saved UBC directory."}
               </p>
               <button onClick={live.retry}>
-                Retry <RefreshCw size={14} />
+                Retry <RefreshCw size={16} />
               </button>
             </div>
           )}
-          <div className="results-label" aria-live="polite">
-            {initialLoading
-              ? "Finding your spaces…"
-              : `${filtered.length} ${filtered.length === 1 ? "space" : "spaces"}${query || building !== "all" || filter !== "all" ? " found" : " to explore"}`}
+          {!initialLoading && !demo && !reporting.length && (
+            <div className="coverage-note">
+              <Info size={17} />
+              <p>
+                Live readings are currently unavailable. Browse locations and
+                room details below.
+              </p>
+            </div>
+          )}
+          <div className="results-label">
+            <span aria-live="polite">
+              {initialLoading
+                ? "Loading study spaces…"
+                : `Showing ${Math.min(limit, filtered.length)} of ${filtered.length} spaces`}
+            </span>
             <span>
               {demo
                 ? "Fictional sample data"
                 : live.checkedAt
                   ? `Last checked ${timeAgo(live.checkedAt, now).toLowerCase()}`
-                  : "No successful API check yet"}
+                  : "Limited live coverage"}
             </span>
           </div>
           {initialLoading ? (
             <div className="room-grid" aria-label="Loading spaces">
               {[0, 1, 2].map((i) => (
                 <div className="room-skeleton" key={i}>
-                  <div />
                   <span />
                   <span />
                   <span />
@@ -986,7 +841,7 @@ export default function App() {
             </div>
           ) : filtered.length ? (
             <div className="room-grid">
-              {filtered.map((room, index) => (
+              {filtered.slice(0, limit).map((room) => (
                 <RoomCard
                   key={room.room_id}
                   room={room}
@@ -995,90 +850,63 @@ export default function App() {
                   saved={saved.has(room.room_id)}
                   onSave={toggle}
                   onOpen={(room) => setSelected(room.room_id)}
-                  index={index}
                   demo={demo}
                 />
               ))}
             </div>
           ) : (
             <div className="empty-state">
-              {filter === "saved" ? (
-                <Heart size={29} strokeWidth={1.4} />
-              ) : (
-                <Search size={29} strokeWidth={1.4} />
-              )}
+              <Search size={28} />
               <h3>
-                {filter === "saved" && !query
-                  ? "Keep a good spot close."
-                  : rooms.length
-                    ? "No spaces match just yet."
-                    : live.status === "error"
-                      ? "Monitored spaces unavailable."
-                      : "No monitored rooms yet."}
+                {rooms.length
+                  ? "No spaces match just yet."
+                  : "No listed spaces yet."}
               </h3>
               <p>
-                {filter === "saved" && !query
-                  ? "Tap the heart on a space to find it here next time."
-                  : rooms.length
-                    ? "Try another search or give your filters a little more room."
-                    : live.status === "error"
-                      ? "Use Retry to check the API again, or explore the fictional sample preview."
-                      : "No monitored rooms are listed. Browse the unmonitored UBC directory below, or try the sample preview."}
+                {filter === "saved"
+                  ? "Save a space with the heart to find it here next time."
+                  : "Try another search or clear your filters."}
               </p>
-              {rooms.length > 0 && (
-                <button className="secondary-button" onClick={clearFilters}>
-                  Show all spaces <ArrowRight size={15} />
-                </button>
-              )}
+              <button className="secondary-button" onClick={clearFilters}>
+                Clear filters <ArrowRight size={16} />
+              </button>
             </div>
           )}
-          {!demo && <UnmonitoredSpaces rooms={sources.unmonitored} />}
-          {!demo && (
-            <div className="preview-invitation">
-              <span className="preview-icon">
-                <BookOpen size={23} strokeWidth={1.5} />
-              </span>
-              <div>
-                <h3>Explore a fictional study-space preview.</h3>
-                <p>
-                  Curious what room looks like with more spaces? Take a look at
-                  the sample preview.
-                </p>
-              </div>
+          {!initialLoading && limit < filtered.length && (
+            <div className="load-more">
               <button
                 className="secondary-button"
-                onClick={() => switchDemo(true)}
+                onClick={() => setLimit((value) => value + 12)}
               >
-                Explore sample spaces <ArrowUpRight size={16} />
+                Show more spaces <ChevronDown size={16} />
               </button>
             </div>
           )}
           <div className="data-note">
             <span>
-              <span className="legend-dot" />
-              {demo ? "Fictional readings for preview only." : "Measurements have their own timestamps."}
+              <Info size={16} />
+              Counts and sound levels are estimates. Coverage is limited to
+              instrumented spaces.
             </span>
             <button onClick={() => setHow(true)}>
-              A note on the numbers <Info size={14} />
+              About the readings <ArrowUpRight size={16} />
             </button>
           </div>
         </section>
-        <section className="closing-note page-width">
-          <span className="tiny-star" aria-hidden="true">
-            <Asterisk size={20} />
-          </span>
-          <p>
-            A little space. A clearer head.
-            <br />
-            <em>You’ve got this.</em>
-          </p>
-          <span className="closing-line" />
-        </section>
       </main>
       <footer className="page-width site-footer">
-        <Brand small />
-        <p>Made for better study days.</p>
-        <span>An independent UBC prototype · limited coverage.</span>
+        <Brand />
+        <p>A little space to focus.</p>
+        <span>
+          Independent UBC project ·{" "}
+          <a
+            href="https://learningspaces.ubc.ca/find-a-space-informal/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Room metadata & photos: UBC Learning Spaces
+          </a>
+        </span>
       </footer>
       {how && <HowItWorks onClose={() => setHow(false)} />}
       {currentRoom && (

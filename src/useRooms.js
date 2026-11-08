@@ -45,10 +45,10 @@ export function useRooms() {
   return { ...state, retry: () => setAttempt((value) => value + 1) };
 }
 
-export function useSavedRooms() {
+export function useSavedRooms(storageKey = "room.saved") {
   const [saved, setSaved] = useState(() => {
     try {
-      const value = JSON.parse(localStorage.getItem("room.saved") || "[]");
+      const value = JSON.parse(localStorage.getItem(storageKey) || "[]");
       return new Set(
         Array.isArray(value)
           ? value.filter((id) => typeof id === "string")
@@ -64,7 +64,7 @@ export function useSavedRooms() {
       if (next.has(id)) next.delete(id);
       else next.add(id);
       try {
-        localStorage.setItem("room.saved", JSON.stringify([...next]));
+        localStorage.setItem(storageKey, JSON.stringify([...next]));
       } catch {
         /* Saving is optional. */
       }
