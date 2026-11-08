@@ -9,6 +9,7 @@ import {
   roomState,
   sampleRooms,
   noiseReading,
+  displayedNoiseReading,
   occupancyReading,
   timeAgo,
   hasRecentReading,
@@ -22,6 +23,23 @@ test('noise-only community freshness never revives stale occupancy or static dem
   assert.equal(availableSeats(room, now, 60), null);
   assert.equal(hasRecentReading(room, now + 1000, 60), false);
   assert.equal(hasRecentReading({ ...stale, latest_reading: { ...stale.latest_reading, device_id: 'demo-old' } }, now, 60), false);
+});
+
+test('outdated sound is displayable without becoming fresh or available', () => {
+  const now = Date.now();
+  const room = { ...sampleRooms(now - 3600000)[3], stale: true };
+  assert.equal(occupancyReading(room, now).people_count, 0);
+  assert.equal(displayedNoiseReading(room, now, 60), room.latest_reading);
+  assert.equal(noiseReading(room, now, 60), null);
+  assert.equal(hasRecentReading(room, now, 60), false);
+  assert.equal(availableSeats(room, now, 60), null);
+  assert.equal(roomState(room, now, 60).label, 'Outdated reading');
+  assert.equal(displayedNoiseReading({ ...room, latest_reading: null }, now, 60), null);
+  assert.equal(displayedNoiseReading({ ...room, latest_reading: { ...room.latest_reading, noise_level: null } }, now, 60), null);
+  const estimate = { noise_band: 'moderate', expires_at: new Date(now + 1000).toISOString() };
+  const reported = { ...room, estimate: { noise: estimate } };
+  assert.equal(displayedNoiseReading(reported, now, 60), estimate);
+  assert.equal(displayedNoiseReading(reported, now + 1000, 60), room.latest_reading);
 });
 
 test("unknown capacity stays unknown; stale counts are not treated as available seats", () => {

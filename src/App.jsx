@@ -27,6 +27,7 @@ import {
   locationLabel,
   occupancyReading,
   noiseReading,
+  displayedNoiseReading,
   hasStaticDemo,
   hasDisplayedOccupancy,
   hasRecentReading,
@@ -184,13 +185,14 @@ function RoomCard({
   const live = hasDisplayedOccupancy(room, now, staleAfterSeconds);
   const reading = room.latest_reading;
   const occupancy = occupancyReading(room, now);
-  const sound = noiseReading(room, now, staleAfterSeconds);
+  const sound = displayedNoiseReading(room, now, staleAfterSeconds);
+  const outdatedSound = sound && !noiseReading(room, now, staleAfterSeconds);
   const current = hasRecentReading(room, now, staleAfterSeconds);
   const estimate = [room.estimate?.occupancy, room.estimate?.noise]
     .find((value) => value && now < Date.parse(value.expires_at));
   const timestamp = estimate?.measured_at ?? reading?.measured_at;
   const count =
-    live && Number.isFinite(occupancy?.people_count)
+    Number.isFinite(occupancy?.people_count)
       ? occupancy.people_count
       : null;
   const fraction = live ? occupancy?.fraction : null;
@@ -236,7 +238,7 @@ function RoomCard({
         <div className="card-metrics">
           <div className={`card-metric noise-${band?.level ?? "unknown"}`}>
             <AudioLines size={20} aria-hidden="true" />
-            <span>Noise level</span>
+            <span>{outdatedSound ? "Last noise level · outdated" : "Noise level"}</span>
             <strong>{band?.label ?? "Noise unavailable"}</strong>
             {sound?.noise_unit === "dBA" && band && (
               <small>{formatNoise(sound)}</small>
@@ -244,7 +246,7 @@ function RoomCard({
           </div>
           <div className={`card-metric ${seats === 0 ? "metric-full" : ""}`}>
             <Users size={20} aria-hidden="true" />
-            <span>{seats != null ? "Estimated seats" : "Occupancy"}</span>
+            <span>{!live && count != null ? "Last occupancy · outdated" : seats != null ? "Estimated seats" : "Occupancy"}</span>
             <strong>
               {seats != null
                 ? `About ${seats} ${seats === 1 ? "seat" : "seats"} free`
@@ -283,7 +285,7 @@ function RoomCard({
       <div className="room-card-footer">
         <span>
           {count != null
-            ? `About ${count} people ${occupancy?.source ? "estimated" : "measured"}`
+            ? `About ${count} people ${!live ? "at last measurement" : occupancy?.source ? "estimated" : "measured"}`
             : "Current occupancy unknown"}
         </span>
         <button onClick={() => onOpen(room)} aria-label={`View ${room.name}`}>
@@ -416,7 +418,8 @@ function RoomDetails({
     : roomState(room, now, staleAfterSeconds);
   const live = hasDisplayedOccupancy(room, now, staleAfterSeconds);
   const occupancy = occupancyReading(room, now);
-  const sound = noiseReading(room, now, staleAfterSeconds);
+  const sound = displayedNoiseReading(room, now, staleAfterSeconds);
+  const outdatedSound = sound && !noiseReading(room, now, staleAfterSeconds);
   useEffect(() => {
     if (demo) {
       setHistory({ status: "ok", readings: sampleHistory(room, now) });
@@ -477,9 +480,9 @@ function RoomDetails({
       <div className="detail-metrics">
         <div>
           <Users size={19} />
-          <span>Estimated people</span>
+          <span>{!live && Number.isFinite(occupancy?.people_count) ? "Last people count · outdated" : "Estimated people"}</span>
           <strong>
-            {live && Number.isFinite(occupancy?.people_count)
+            {Number.isFinite(occupancy?.people_count)
               ? occupancy.people_count
               : live && occupancy?.fraction != null
                 ? `~${Math.round(occupancy.fraction * 100)}% full`
@@ -489,7 +492,7 @@ function RoomDetails({
         </div>
         <div>
           <AudioLines size={20} />
-          <span>Sound band · approximate</span>
+          <span>{outdatedSound ? "Last sound band · outdated" : "Sound band · approximate"}</span>
           <strong>
             {sound
               ? (noiseBand(sound)?.label ?? "Noise unavailable")
@@ -865,8 +868,8 @@ export default function App() {
             <div className="coverage-note">
               <Info size={17} />
               <p>
-                Live readings are currently unavailable. Browse locations and
-                room details below.
+                Live readings are currently unavailable. Last recorded values
+                are shown where available and labeled outdated.
               </p>
             </div>
           )}

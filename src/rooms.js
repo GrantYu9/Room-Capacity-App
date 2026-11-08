@@ -40,6 +40,12 @@ export function noiseReading(room, now, staleAfterSeconds = 60) {
   return raw && !room.stale && now - Date.parse(raw.measured_at) <= staleAfterSeconds * 1000 ? raw : null;
 }
 
+// Historical sound is display-only; filters continue to use fresh noiseReading.
+export function displayedNoiseReading(room, now, staleAfterSeconds = 60) {
+  return noiseReading(room, now, staleAfterSeconds) ??
+    (Number.isFinite(room.latest_reading?.noise_level) ? room.latest_reading : null);
+}
+
 export function locationLabel(location) {
   if (!location) return "";
   const building = [
@@ -81,7 +87,7 @@ export function roomState(room, now, staleAfterSeconds) {
   const fresh = freshness(room, now, staleAfterSeconds);
   if (fresh === "waiting")
     return { key: "waiting", label: "Awaiting a reading" };
-  if (fresh === "delayed") return { key: "delayed", label: "Reading delayed" };
+  if (fresh === "delayed") return { key: "delayed", label: "Outdated reading" };
   if (fresh === 'demo') return { key: 'live', label: 'Static demo data' };
   const people = occupancyReading(room, now)?.people_count;
   if (!Number.isFinite(people)) return { key: 'live', label: occupancyReading(room, now)?.fraction != null ? 'Approximate fullness reported' : 'Recent reading' };

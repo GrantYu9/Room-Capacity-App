@@ -60,7 +60,8 @@ test('a noise-only observation ranks as current without reviving stale occupancy
   await expect(card).toContainText('Zebra Reading Room');
   await expect(card).toContainText('Community noise estimate');
   await expect(card).toContainText('Quiet');
-  await expect(card).toContainText('Occupancy unavailable');
+  await expect(card).toContainText('Last occupancy · outdated');
+  await expect(card).toContainText('About 5 people');
   await expect(page.getByText('1 of 69 listed spaces have recent readings.')).toBeVisible();
   await page.getByRole('button', { name: 'View Zebra Reading Room', exact: true }).click();
   const dialog = page.getByRole('dialog');

@@ -264,7 +264,7 @@ test("zero counts, missing metrics, unknown capacity and over-capacity readings 
   await noOverflow(page);
 });
 
-test("failed refresh ages cached data, excludes stale metrics, and recovers in an open detail", async ({
+test("failed refresh retains outdated readings and recovers in an open detail", async ({
   page,
 }) => {
   await page.clock.install();
@@ -283,9 +283,14 @@ test("failed refresh ages cached data, excludes stale metrics, and recovers in a
   await page.getByRole("button", { name: "View Reading Room" }).click();
   healthy = false;
   await page.clock.fastForward(71000);
-  await expect(page.getByRole("dialog")).toContainText("Reading delayed");
+  await expect(page.getByRole("dialog")).toContainText("Outdated reading");
+  await expect(page.getByRole("dialog")).toContainText("Last people count · outdated");
+  await expect(page.getByRole("dialog")).toContainText("Last sound band · outdated");
+  await expect(page.getByRole("dialog")).toContainText("Quiet");
   await page.keyboard.press("Escape");
   await expect(card(page, "Reading Room")).toContainText("Last measured");
+  await expect(card(page, "Reading Room")).toContainText("About 3 people");
+  await expect(card(page, "Reading Room")).toContainText("Last noise level · outdated");
   await expect(page.getByRole("alert")).toContainText("Couldn’t refresh");
   await filter(page, /Quiet/).click();
   await expect(page.getByRole("article")).toHaveCount(0);
@@ -300,9 +305,37 @@ test("failed refresh ages cached data, excludes stale metrics, and recovers in a
   await filter(page, /All/).click();
   await page.getByRole("button", { name: "View Reading Room" }).click();
   await expect(page.getByRole("dialog")).toContainText("Lively");
+  await expect(page.getByRole("dialog")).not.toContainText("outdated");
   data[0].latest_reading = { ...data[0].latest_reading, noise_level: 0.1 };
   await page.clock.fastForward(11000);
   await expect(page.getByRole("dialog")).toContainText("Quiet");
+});
+
+test('saved outdated sensor readings remain visible after reloading', async ({ page }) => {
+  const room = rooms()[0];
+  room.stale = true;
+  room.latest_reading.measured_at = new Date(Date.now() - 86400000).toISOString();
+  room.latest_reading.people_count = 0;
+  await mockRooms(page, [room]);
+  await page.goto('/');
+  await page.reload();
+  await page.getByRole('searchbox').fill('Reading Room');
+  const result = card(page, 'Reading Room');
+  await expect(result).toContainText('Outdated reading');
+  await expect(result).toContainText('About 0 people');
+  await expect(result).toContainText('Quiet');
+  await expect(result).toContainText('Last measured');
+  await expect(result).not.toContainText('seats free');
+  await result.getByRole('button', { name: 'View Reading Room' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Last people count · outdated').locator('..')).toContainText('0');
+  await expect(dialog).toContainText('Last sound band · outdated');
+  await page.keyboard.press('Escape');
+  await filter(page, /Seats available/).click();
+  await expect(page.getByRole('article')).toHaveCount(0);
+  await filter(page, /Quiet/).click();
+  await expect(page.getByRole('article')).toHaveCount(0);
+  await noOverflow(page);
 });
 
 test("history errors recover locally and empty history leaves room details usable", async ({
