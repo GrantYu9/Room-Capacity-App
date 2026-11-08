@@ -32,6 +32,9 @@ import {
 } from "./rooms.js";
 import { useRooms, useSavedRooms } from "./useRooms.js";
 import { fetchJson } from "./api.js";
+import directoryRooms from "../data/rooms.json";
+import UnmonitoredSpaces from "./UnmonitoredSpaces.jsx";
+import { splitRoomSources } from "./roomSources.js";
 
 const filters = [
   { id: "all", label: "All spaces" },
@@ -631,7 +634,8 @@ export default function App() {
   const spacesRef = useRef(null);
   const examples = useMemo(() => sampleRooms(), [demo]);
   const clock = demo ? Date.parse(examples[0].latest_reading.measured_at) : now;
-  const rooms = demo ? examples : live.rooms;
+  const sources = useMemo(() => splitRoomSources(directoryRooms, live.rooms), [live.rooms]);
+  const rooms = demo ? examples : sources.monitored;
   const savedCount = rooms.filter((room) => saved.has(room.room_id)).length;
   const staleAfter = live.staleAfterSeconds;
   useEffect(() => {
@@ -1027,7 +1031,7 @@ export default function App() {
                     ? "Try another search or give your filters a little more room."
                     : live.status === "error"
                       ? "Use Retry to check the API again, or explore the fictional sample preview."
-                      : "The API is reachable, but no rooms have been added. You can still try the sample preview."}
+                      : "No monitored rooms are listed. Browse the unmonitored UBC directory below, or try the sample preview."}
               </p>
               {rooms.length > 0 && (
                 <button className="secondary-button" onClick={clearFilters}>
@@ -1036,6 +1040,7 @@ export default function App() {
               )}
             </div>
           )}
+          {!demo && <UnmonitoredSpaces rooms={sources.unmonitored} />}
           {!demo && (
             <div className="preview-invitation">
               <span className="preview-icon">
