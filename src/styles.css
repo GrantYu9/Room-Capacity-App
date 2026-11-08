@@ -2004,3 +2004,47 @@ html:has(dialog[open]) {
     transition: none !important;
   }
 }
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  border-radius: 8px;
+  background: var(--green);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sample-label,
+.measurement-time {
+  font-size: 11px;
+  color: #5e6d56;
+  line-height: 1.7;
+}
+.sample-label {
+  margin-bottom: 8px;
+}
+.measurement-time {
+  margin-top: 16px;
+}
+.noise-level {
+  flex-wrap: wrap;
+}
+.noise-value {
+  overflow-wrap: anywhere;
+}
+.activity-heading {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.summary-stat small {
+  white-space: normal;
+}

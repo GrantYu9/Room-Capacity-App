@@ -4,6 +4,7 @@ import { locationLabel } from "../src/rooms.js";
 import {
   availableSeats,
   freshness,
+  formatNoise,
   noiseBand,
   roomState,
   sampleRooms,
@@ -53,4 +54,26 @@ test("a known address or coordinates are displayed when a building name is missi
   );
   assert.equal(locationLabel({ latitude: 0, longitude: 0 }), "0.0000, 0.0000");
   assert.equal(locationLabel({ latitude: null, longitude: null }), "");
+});
+
+
+test("zero people and over-capacity estimates retain their counts and clamp seats", () => {
+  const now = Date.now();
+  const room = sampleRooms(now)[3];
+  assert.equal(room.latest_reading.people_count, 0);
+  assert.equal(availableSeats(room, now, 60), 6);
+  assert.equal(roomState(room, now, 60).label, "No people detected");
+  assert.equal(availableSeats({ ...room, total_capacity: null }, now, 60), null);
+  const crowded = { ...room, latest_reading: { ...room.latest_reading, people_count: 9 } };
+  assert.equal(availableSeats(crowded, now, 60), 0);
+  assert.equal(crowded.latest_reading.people_count, 9);
+  assert.equal(freshness(room, now + 60000, 60), "live");
+  assert.equal(freshness(room, now + 60001, 60), "delayed");
+});
+
+test("sound values preserve explicit units and missing is distinct from zero", () => {
+  assert.equal(formatNoise({ noise_level: 0, noise_unit: "relative" }), "0% relative sound level");
+  assert.equal(formatNoise({ noise_level: 42.3, noise_unit: "dBA" }), "42 dBA");
+  assert.equal(formatNoise({ noise_level: null }), "—");
+  assert.equal(noiseBand({ noise_level: 0, noise_unit: "relative" }).label, "Quiet");
 });
