@@ -264,9 +264,9 @@ test("zero counts, missing metrics, unknown capacity and over-capacity readings 
   await noOverflow(page);
 });
 
-test("failed refresh retains outdated readings and recovers in an open detail", async ({
+test("failed refresh keeps last measurements visible, excludes them from current filters, and recovers", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.clock.install();
   let healthy = true;
   const data = [rooms()[0]];
@@ -284,15 +284,22 @@ test("failed refresh retains outdated readings and recovers in an open detail", 
   healthy = false;
   await page.clock.fastForward(71000);
   await expect(page.getByRole("dialog")).toContainText("Outdated reading");
-  await expect(page.getByRole("dialog")).toContainText("Last people count · outdated");
-  await expect(page.getByRole("dialog")).toContainText("Last sound band · outdated");
-  await expect(page.getByRole("dialog")).toContainText("Quiet");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText('People at last reading', { exact: true }).locator('..').locator('strong')).toContainText('3');
+  await expect(dialog.getByText('Last estimated available seats', { exact: true }).locator('..').locator('strong')).toContainText('9');
+  await expect(dialog.locator('.detail-metrics')).toContainText('Quiet');
+  await page.screenshot({ path: testInfo.outputPath('delayed-details.png') });
   await page.keyboard.press("Escape");
   await expect(card(page, "Reading Room")).toContainText("Last measured");
-  await expect(card(page, "Reading Room")).toContainText("About 3 people");
-  await expect(card(page, "Reading Room")).toContainText("Last noise level · outdated");
+  await expect(card(page, "Reading Room")).toContainText("About 9 seats free");
+  await expect(card(page, "Reading Room")).toContainText("About 3 people last measured");
+  await expect(card(page, "Reading Room")).toContainText("Last measured noise");
+  await expect(card(page, "Reading Room")).toContainText("Quiet");
+  await page.screenshot({ path: testInfo.outputPath('delayed-directory.png') });
   await expect(page.getByRole("alert")).toContainText("Couldn’t refresh");
   await filter(page, /Quiet/).click();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  await filter(page, /Seats available/).click();
   await expect(page.getByRole("article")).toHaveCount(0);
   healthy = true;
   data[0].latest_reading = {
@@ -305,10 +312,33 @@ test("failed refresh retains outdated readings and recovers in an open detail", 
   await filter(page, /All/).click();
   await page.getByRole("button", { name: "View Reading Room" }).click();
   await expect(page.getByRole("dialog")).toContainText("Lively");
-  await expect(page.getByRole("dialog")).not.toContainText("outdated");
   data[0].latest_reading = { ...data[0].latest_reading, noise_level: 0.1 };
   await page.clock.fastForward(11000);
   await expect(page.getByRole("dialog")).toContainText("Quiet");
+});
+
+test('successful polls keep the last values between sensor uploads and replace them when a new reading arrives', async ({ page }) => {
+  await page.clock.install();
+  const data = [rooms()[0]];
+  await mockRooms(page, data);
+  await page.goto('/');
+  await page.getByRole('searchbox').fill('Reading Room');
+  await expect(card(page, 'Reading Room')).toContainText('About 9 seats free');
+  await page.clock.fastForward(71000);
+  await expect(card(page, 'Reading Room')).toContainText('Outdated reading');
+  await expect(card(page, 'Reading Room')).toContainText('About 9 seats free');
+  await expect(card(page, 'Reading Room')).toContainText('Quiet');
+  await page.getByRole('button', { name: 'View Reading Room' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('People at last reading', { exact: true }).locator('..').locator('strong')).toContainText('3');
+  data[0].latest_reading = { ...data[0].latest_reading, measured_at: await page.evaluate(() => new Date().toISOString()), people_count: 4, noise_level: 0.8 };
+  await page.clock.fastForward(11000);
+  await expect(dialog.getByText('Estimated people', { exact: true }).locator('..').locator('strong')).toContainText('4');
+  await expect(dialog.locator('.detail-metrics')).toContainText('Lively');
+  await expect(dialog.getByText('Estimated available seats', { exact: true }).locator('..').locator('strong')).toContainText('8');
+  await page.keyboard.press('Escape');
+  await expect(card(page, 'Reading Room')).toContainText('About 8 seats free');
+  await expect(card(page, 'Reading Room')).toContainText('Recent reading');
 });
 
 test('saved outdated sensor readings remain visible after reloading', async ({ page }) => {
@@ -325,11 +355,12 @@ test('saved outdated sensor readings remain visible after reloading', async ({ p
   await expect(result).toContainText('About 0 people');
   await expect(result).toContainText('Quiet');
   await expect(result).toContainText('Last measured');
-  await expect(result).not.toContainText('seats free');
+  await expect(result).toContainText('Last estimated seats');
+  await expect(result).toContainText('About 12 seats free');
   await result.getByRole('button', { name: 'View Reading Room' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByText('Last people count · outdated').locator('..')).toContainText('0');
-  await expect(dialog).toContainText('Last sound band · outdated');
+  await expect(dialog.getByText('People at last reading').locator('..')).toContainText('0');
+  await expect(dialog).toContainText('Last measured sound · approximate');
   await page.keyboard.press('Escape');
   await filter(page, /Seats available/).click();
   await expect(page.getByRole('article')).toHaveCount(0);

@@ -13,7 +13,49 @@ import {
   occupancyReading,
   timeAgo,
   hasRecentReading,
+  displayedOccupancy,
+  displayedNoise,
+  displayedSeats,
 } from "../src/rooms.js";
+
+test('delayed measurements remain displayable without counting as current availability', () => {
+  const now = Date.now();
+  const room = { ...sampleRooms(now - 3600000)[0], stale: true };
+  assert.equal(displayedOccupancy(room, now).people_count, 5);
+  assert.equal(displayedOccupancy(room, now).measured_at, room.latest_reading.measured_at);
+  assert.equal(displayedNoise(room, now, 60).noise_level, 0.12);
+  assert.equal(displayedSeats(room, now), 11);
+  assert.equal(freshness(room, now, 60), 'delayed');
+  assert.equal(hasRecentReading(room, now, 60), false);
+  assert.equal(availableSeats(room, now, 60), null);
+  assert.equal(noiseReading(room, now, 60), null);
+  assert.equal(displayedSeats({ ...room, total_capacity: null }, now), null);
+  const invalid = { ...room, latest_reading: { ...room.latest_reading, measured_at: 'invalid' } };
+  assert.equal(displayedOccupancy(invalid, now), null);
+  assert.equal(displayedNoise(invalid, now, 60), null);
+  assert.equal(displayedSeats(invalid, now), null);
+  const empty = { ...room, latest_reading: null };
+  assert.equal(displayedOccupancy(empty, now), null);
+  assert.equal(displayedNoise(empty, now, 60), null);
+});
+
+test('expired community values fall back to the last sensor measurement, including zero', () => {
+  const now = Date.now();
+  const room = { ...sampleRooms(now - 3600000)[3], stale: true, estimate: {
+    occupancy: { people_count: 2, expires_at: new Date(now + 1000).toISOString() },
+    noise: { noise_band: 'moderate', source: 'community', expires_at: new Date(now + 1000).toISOString() },
+  } };
+  assert.equal(displayedOccupancy(room, now).people_count, 2);
+  assert.equal(displayedNoise(room, now, 60).noise_band, 'moderate');
+  assert.equal(displayedSeats(room, now), 4);
+  assert.equal(displayedOccupancy(room, now + 1000).people_count, 0);
+  assert.equal(displayedNoise(room, now + 1000, 60).noise_level, 0.08);
+  assert.equal(displayedSeats(room, now + 1000), 6);
+  assert.equal(availableSeats(room, now + 1000, 60), null);
+  const sensorless = { ...room, latest_reading: null };
+  assert.equal(displayedOccupancy(sensorless, now + 1000), null);
+  assert.equal(displayedNoise(sensorless, now + 1000, 60), null);
+});
 
 test('noise-only community freshness never revives stale occupancy or static demos', () => {
   const now = Date.now();

@@ -40,10 +40,24 @@ export function noiseReading(room, now, staleAfterSeconds = 60) {
   return raw && !room.stale && now - Date.parse(raw.measured_at) <= staleAfterSeconds * 1000 ? raw : null;
 }
 
-// Historical sound is display-only; filters continue to use fresh noiseReading.
-export function displayedNoiseReading(room, now, staleAfterSeconds = 60) {
-  return noiseReading(room, now, staleAfterSeconds) ??
-    (Number.isFinite(room.latest_reading?.noise_level) ? room.latest_reading : null);
+// Display the last measured metrics after they become delayed. Freshness-based
+// filters continue using availableSeats/noiseReading/hasRecentReading above.
+export function displayedOccupancy(room, now = Date.now()) {
+  const reading = occupancyReading(room, now);
+  if (!reading || (reading === room.latest_reading && !Number.isFinite(Date.parse(reading.measured_at)))) return null;
+  return Number.isFinite(reading.people_count) || Number.isFinite(reading.fraction) ? reading : null;
+}
+
+export function displayedNoise(room, now, staleAfterSeconds = 60) {
+  const reading = noiseReading(room, now, staleAfterSeconds) ?? room.latest_reading;
+  if (!reading || (reading === room.latest_reading && !Number.isFinite(Date.parse(reading.measured_at)))) return null;
+  return noiseBand(reading) ? reading : null;
+}
+
+export function displayedSeats(room, now) {
+  const people = displayedOccupancy(room, now)?.people_count;
+  return Number.isFinite(room.total_capacity) && Number.isFinite(people)
+    ? Math.max(0, room.total_capacity - people) : null;
 }
 
 export function locationLabel(location) {
@@ -230,4 +244,9 @@ export function sampleHistory(room, now = Date.now()) {
       ),
     ),
   }));
+}
+
+// Preserve the shared display selector used by existing consumers.
+export function displayedNoiseReading(room, now, staleAfterSeconds = 60) {
+  return displayedNoise(room, now, staleAfterSeconds);
 }

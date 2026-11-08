@@ -48,7 +48,7 @@ test('headcount zero is submitted and rate-limit errors preserve the observation
   expect(submitted).toEqual({ room_id: 'reporting', people_count: 0 });
 });
 
-test('a noise-only observation ranks as current without reviving stale occupancy', async ({ page }) => {
+test('a noise-only observation ranks as current while occupancy stays labeled as last measured', async ({ page }) => {
   const now = Date.now();
   const room = { room_id: 'noise-report', name: 'Zebra Reading Room', total_capacity: 20,
     stale: true, location: {}, latest_reading: { device_id: 'pi', measured_at: new Date(now - 3600000).toISOString(), people_count: 5, noise_level: 0.8, noise_unit: 'relative' },
@@ -60,12 +60,12 @@ test('a noise-only observation ranks as current without reviving stale occupancy
   await expect(card).toContainText('Zebra Reading Room');
   await expect(card).toContainText('Community noise estimate');
   await expect(card).toContainText('Quiet');
-  await expect(card).toContainText('Last occupancy · outdated');
-  await expect(card).toContainText('About 5 people');
+  await expect(card).toContainText('Last estimated seats');
+  await expect(card).toContainText('About 15 seats free');
   await expect(page.getByText('1 of 69 listed spaces have recent readings.')).toBeVisible();
   await page.getByRole('button', { name: 'View Zebra Reading Room', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toContainText('Community noise estimate');
   await expect(dialog.getByText('Noise: community · 1 contributing report', { exact: true })).toBeVisible();
-  await expect(dialog.getByText('Estimated available seats').locator('..')).toContainText('—');
+  await expect(dialog.getByText('Last estimated available seats').locator('..')).toContainText('15');
 });
