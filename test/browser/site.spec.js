@@ -76,7 +76,7 @@ test("live spaces show current data, preserve unknown metadata and open activity
   await mockRooms(page);
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Find a little room to focus." }),
+    page.getByRole("heading", { name: "Find a quieter place to study" }),
   ).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(3);
   const reading = page.getByRole("article").filter({
@@ -172,7 +172,7 @@ test("sample view is explicit, fictional and does not inflate live favourites", 
   await expect(
     page.getByRole("button", { name: "Saved spaces (1)", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Back to live data/ }).click();
+  await page.getByRole("button", { name: /Back to monitored rooms/ }).click();
   await expect(page.getByRole("article")).toHaveCount(1);
   await expect(
     page.getByRole("button", { name: "Saved spaces", exact: true }),
@@ -196,7 +196,7 @@ test("a failed API request shows an error and retry recovers without demo fallba
   );
   await page.goto("/");
   await expect(page.getByRole("alert")).toContainText(
-    "We couldn’t load live spaces",
+    "We couldn’t load monitored spaces",
   );
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(
@@ -260,7 +260,7 @@ test("help dialog and sample layout work without horizontal overflow", async ({
   await page.evaluate(() => document.fonts.ready);
   await noOverflow(page);
   await page
-    .getByRole("heading", { name: "Find a little room to focus." })
+    .getByRole("heading", { name: "Find a quieter place to study" })
     .scrollIntoViewIfNeeded();
   await page.evaluate(() => {
     document.activeElement?.blur();
@@ -302,4 +302,117 @@ test("live, sample and detail views pass automated accessibility checks", async 
     .click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await check();
+});
+
+test("zero, unknown capacity and over-capacity readings stay distinct", async ({ page }) => {
+  const [base] = rooms();
+  const data = [
+    { ...base, room_id: "zero", name: "Zero Room", latest_reading: { ...base.latest_reading, people_count: 0, noise_level: 0 } },
+    { ...base, room_id: "unknown", name: "Unknown Room", total_capacity: null },
+    { ...base, room_id: "over", name: "Over Room", latest_reading: { ...base.latest_reading, people_count: 15, noise_level: 42, noise_unit: "dBA" } },
+  ];
+  await mockRooms(page, data);
+  await page.goto("/");
+  const card = (name) => page.getByRole("article").filter({ has: page.getByRole("heading", { name, exact: true }) });
+  await expect(card("Zero Room").getByText("No people detected")).toBeVisible();
+  await expect(card("Zero Room").getByText("12 seats")).toBeVisible();
+  await expect(card("Zero Room").getByText("0% relative sound level")).toBeVisible();
+  await expect(card("Unknown Room").getByText("Capacity unknown · available seats unknown")).toBeVisible();
+  await expect(card("Over Room").getByText("0 estimated seats available")).toBeVisible();
+  await expect(card("Over Room").getByRole("progressbar")).toHaveAttribute("aria-valuenow", "15");
+  await expect(card("Over Room").getByText("42 dBA")).toBeVisible();
+  await page.getByRole("combobox", { name: "Sort spaces" }).selectOption("seats");
+  await expect(page.getByRole("article").first()).toContainText("Zero Room");
+  await page.getByRole("button", { name: "View Unknown Room" }).click();
+  await expect(page.getByRole("dialog").getByText("Capacity unknown", { exact: true })).toBeVisible();
+  await noOverflow(page);
+});
+
+test("reachable API without recent readings does not imply reporting sensors", async ({ page }) => {
+  const data = rooms();
+  data[0].latest_reading.measured_at = new Date(Date.now() - 120000).toISOString();
+  await mockRooms(page, [data[0], data[2]]);
+  await page.goto("/");
+  await expect(page.getByRole("status")).toContainText("API reachable");
+  const summary = page.getByRole("region", { name: "Study space summary" });
+  await expect(summary).toContainText("0 of 2 rooms have recent readings");
+  await expect(summary).toContainText("No recent readings");
+  await page.getByRole("group", { name: "Filter spaces" }).getByRole("button", { name: /Quiet spaces/ }).click();
+  await expect(page.getByRole("article")).toHaveCount(0);
+});
+
+test("initial loading, empty API and offline sample preview are distinct", async ({ page }) => {
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  await page.route("**/api/rooms*", async (route) => {
+    await gate;
+    await route.fulfill({ json: { rooms: [] } });
+  });
+  await page.goto("/");
+  await expect(page.getByLabel("Loading spaces")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Try sample preview", exact: true })).toBeVisible();
+  release();
+  await expect(page.getByRole("heading", { name: "No monitored rooms yet." })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("API reachable");
+  await page.unroute("**/api/rooms*");
+  await page.route("**/api/rooms*", (route) => route.fulfill({ status: 503, json: {} }));
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Monitored spaces unavailable." })).toBeVisible();
+  await page.getByRole("button", { name: "Try sample preview", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Study space summary" })).toContainText("Fictional sample data");
+  await expect(page.getByRole("article").first()).toContainText("Fictional sample data");
+  await page.getByRole("button", { name: "View The Reading Room", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("Fictional sample data");
+  await expect(page.getByRole("dialog")).toContainText("Last measured");
+});
+
+test("failed refresh retains its successful check time while cached readings age", async ({ page }) => {
+  await page.clock.install();
+  let healthy = true;
+  let data = [rooms()[0]];
+  await page.route("**/api/rooms*", (route) => healthy
+    ? route.fulfill({ json: { rooms: data, stale_after_seconds: 60 } })
+    : route.fulfill({ status: 503, json: {} }));
+  await page.goto("/");
+  await expect(page.getByRole("article")).toHaveCount(1);
+  healthy = false;
+  await page.clock.fastForward(11000);
+  await expect(page.getByRole("alert")).toContainText("Last successful check:");
+  await page.clock.fastForward(60000);
+  await expect(page.getByRole("article")).toContainText("Reading delayed");
+  await expect(page.getByRole("region", { name: "Study space summary" })).toContainText("0 of 1 rooms have recent readings");
+  healthy = true;
+  data[0].latest_reading.measured_at = await page.evaluate(() => new Date().toISOString());
+  await page.getByRole("button", { name: "Retry", exact: false }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("article")).toContainText("Estimated seats available");
+  await expect(page.getByRole("article")).not.toContainText("Fictional");
+});
+
+test("history empty and error states recover and dialog returns keyboard focus", async ({ page }) => {
+  await mockRooms(page);
+  let failed = true;
+  await page.route("**/api/readings?*", (route) => failed
+    ? route.fulfill({ status: 503, json: {} })
+    : route.fulfill({ json: { readings: [] } }));
+  await page.goto("/");
+  const open = page.getByRole("button", { name: "View Reading Room", exact: true });
+  await open.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("heading", { name: "Recent occupancy" })).toBeVisible();
+  await expect(dialog).toContainText("Up to 100 recent readings");
+  await expect(dialog).toContainText("Occupancy history couldn’t be loaded.");
+  failed = false;
+  await dialog.getByRole("button", { name: /Try again/ }).click();
+  await expect(dialog).toContainText("No occupancy history yet.");
+  await page.keyboard.press("Tab");
+  await expect(dialog.locator(":focus")).toHaveCount(1);
+  await noOverflow(page);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(open).toBeFocused();
+  await page.getByRole("button", { name: "How it works", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("roughly every 10 seconds");
+  await expect(page.getByRole("dialog")).toContainText("Each measurement has its own timestamp");
 });

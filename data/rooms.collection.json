@@ -1,0 +1,987 @@
+{
+  "directory_url": "https://learningspaces.ubc.ca/find-a-space-informal/?classroom=&building=&filters=%257B%257D",
+  "checked_at": "2026-11-08T04:34:35.829Z",
+  "coverage": {
+    "status": "complete",
+    "scope": "All entries returned by the unfiltered Vancouver informal directory at collection time; not a campus-wide inventory.",
+    "directory_records": 68,
+    "verified_detail_pages": 68,
+    "building_pages": 38,
+    "pages": [
+      {
+        "page": 1,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 2,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 3,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 4,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 5,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 6,
+        "count": 10,
+        "has_next": true
+      },
+      {
+        "page": 7,
+        "count": 8,
+        "has_next": false
+      }
+    ],
+    "unretrieved_entries": []
+  },
+  "collection": {
+    "runtime_requests": false,
+    "endpoint": "https://learningspaces.ubc.ca/wp-admin/admin-ajax.php",
+    "method": "POST",
+    "action": "find_a_space_rooms",
+    "data": {
+      "campus": "vancouver",
+      "formal": false,
+      "sortBy": "alpha_asc",
+      "filters": {}
+    },
+    "pagination": "Start with no offset, then pass each response offset as data[offset] until no offset is returned. Page sizes: 10, 10, 10, 10, 10, 10, 8.",
+    "verification": "Fetched each Room Link and Building Link with curl, using trailing slashes. Compared directory names, building names and capacities with detail pages; read Space Overview for scope/conflicts. Extracted addresses only from each linked building Address section.",
+    "permalinks": "source_url uses the detail page Copy permalink value, matching the directory Room Link. The HTML rel=canonical tags incorrectly point to a legacy UBC news page and were not used."
+  },
+  "identity": {
+    "strategy": "ubc- followed by the published detail URL slug; stable across collection order. directory_record_id is retained below for future rename reconciliation.",
+    "existing_dataset": "No data/rooms.json existed before this collection.",
+    "existing_ids_preserved": [],
+    "ambiguous_matches": [],
+    "unmatched_existing_examples": [
+      {
+        "room_id": "room-1",
+        "reason": "Prototype placeholder has no identifying location or source; no safe directory match. data/rooms.example.json is unchanged."
+      }
+    ],
+    "preservation": "No existing room metadata was replaced. The database was not accessed. Future refreshes must merge known existing fields when UBC supplies no replacement and preserve IDs for clear matches."
+  },
+  "decisions": {
+    "room_number": "Preserve the directory Room Number text, including named areas and floors. Do not invent numeric rooms or split grouped entries.",
+    "unknown_fields": "Coordinates are null; no geocoding or building-centroid assumptions. Conflicting HENN Foyer capacity is null.",
+    "availability": "Directory metadata is not sensor data. No readings, device assignments or occupancy values are created.",
+    "capacity_conflicts": [
+      "ubc-henn-foyer"
+    ],
+    "database_verification": "Skipped: no DATABASE_URL configured; no confirmed local development database."
+  },
+  "buildings": [
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "checked_at": "2026-11-08T04:33:42.334Z",
+      "address": "1822 East Mall, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/ams-student-nest-nest/",
+      "checked_at": "2026-11-08T04:33:43.694Z",
+      "address": "6133 University Boulevard, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/biological-sciences-building-biol/",
+      "checked_at": "2026-11-08T04:33:43.293Z",
+      "address": "6270 University Boulevard, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/brock-commons-south-brcs/",
+      "checked_at": "2026-11-08T04:33:43.493Z",
+      "address": "6180 Walter Gage Road, Vancouver, BC V6T 1K2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/brock-hall-brck/",
+      "checked_at": "2026-11-08T04:33:44.757Z",
+      "address": "1874 East Mall, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "checked_at": "2026-11-08T04:33:45.762Z",
+      "address": "1866 Main Mall, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/centre-for-interactive-research-on-sustainability-cirs/",
+      "checked_at": "2026-11-08T04:33:44.713Z",
+      "address": "2260 West Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/chemical-and-biological-engineering-building-chbe/",
+      "checked_at": "2026-11-08T04:33:45.888Z",
+      "address": "2360 East Mall, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/civil-and-mechanical-engineering-building-ceme/",
+      "checked_at": "2026-11-08T04:33:45.968Z",
+      "address": "6250 Applied Science Lane, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/earth-sciences-building-esb/",
+      "checked_at": "2026-11-08T04:33:46.809Z",
+      "address": "2207 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/food-nutrition-and-health-building-fnh/",
+      "checked_at": "2026-11-08T04:33:46.151Z",
+      "address": "2205 East Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/forest-sciences-centre-fsc/",
+      "checked_at": "2026-11-08T04:33:47.249Z",
+      "address": "2424 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/fred-kaiser-building-kais/",
+      "checked_at": "2026-11-08T04:33:47.593Z",
+      "address": "2332 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/frederic-lasserre-building-lasr/",
+      "checked_at": "2026-11-08T04:33:47.974Z",
+      "address": "6333 Memorial Road, Vancouver, BC V6T 1Z2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/geography-building-geog/",
+      "checked_at": "2026-11-08T04:33:48.618Z",
+      "address": "1984 West Mall, Vancouver, BC V6T 1Z2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/gordon-b-shrum-building-shrm/",
+      "checked_at": "2026-11-08T04:33:47.887Z",
+      "address": "6088 University Boulevard, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/hebb-building-hebb/",
+      "checked_at": "2026-11-08T04:33:48.239Z",
+      "address": "2045 East Mall, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/hector-j-macleod-building-mcld/",
+      "checked_at": "2026-11-08T04:33:48.518Z",
+      "address": "2356 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/hennings-building-henn/",
+      "checked_at": "2026-11-08T04:33:48.518Z",
+      "address": "6224 Agricultural Road, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/henry-angus-building-angu/",
+      "checked_at": "2026-11-08T04:33:48.809Z",
+      "address": "2053 Main Mall, Vancouver, BC V6T 1Z2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/hr-macmillan-building-mcml/",
+      "checked_at": "2026-11-08T04:33:49.784Z",
+      "address": "2357 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/hugh-dempster-pavilion-dmp/",
+      "checked_at": "2026-11-08T04:33:49.695Z",
+      "address": "6245 Agronomy Road, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/institute-for-computing-information-and-cognitive-systems-computer-science-building-iccs/",
+      "checked_at": "2026-11-08T04:33:50.258Z",
+      "address": "2366 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/iona-building-iona/",
+      "checked_at": "2026-11-08T04:33:49.946Z",
+      "address": "6000 Iona Drive, Vancouver, BC V6T 1L4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/jack-bell-building-for-the-school-of-social-work-sowk/",
+      "checked_at": "2026-11-08T04:33:50.914Z",
+      "address": "2080 West Mall, Vancouver, BC V6T 1Z2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/life-sciences-centre-lsc/",
+      "checked_at": "2026-11-08T04:33:51.373Z",
+      "address": "2350 Health Sciences Mall, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/macisaac-health-building-gwhb/",
+      "checked_at": "2026-11-08T04:33:51.665Z",
+      "address": "5955 University Boulevard, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/mathematics-annex-matx/",
+      "checked_at": "2026-11-08T04:33:51.196Z",
+      "address": "1986 Mathematics Road, Vancouver, BC V6T 1Z2"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/neville-scarfe-building-scrf/",
+      "checked_at": "2026-11-08T04:33:51.506Z",
+      "address": "2125 Main Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/orchard-commons-orch/",
+      "checked_at": "2026-11-08T04:33:51.696Z",
+      "address": "6363 Agronomy Road, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/p-a-woodward-instructional-resources-centre-irc/",
+      "checked_at": "2026-11-08T04:33:53.011Z",
+      "address": "2194 Health Sciences Mall, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/pharmaceutical-sciences-building-phrm/",
+      "checked_at": "2026-11-08T04:33:51.959Z",
+      "address": "2405 Wesbrook Mall, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/ponderosa-commons-west-pcw/",
+      "checked_at": "2026-11-08T04:33:53.161Z",
+      "address": "2075 Lower Mall, Vancouver BC, V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/school-of-population-&-public-health-spph/",
+      "checked_at": "2026-11-08T04:33:54.198Z",
+      "address": "2206 East Mall, Vancouver, BC V6T 1Z3"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/ubc-life-building-life/",
+      "checked_at": "2026-11-08T04:33:53.558Z",
+      "address": "6138 Student Union Boulevard, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/war-memorial-gymnasium-mgym/",
+      "checked_at": "2026-11-08T04:33:54.299Z",
+      "address": "6081 University Boulevard, Vancouver, BC V6T 1Z1"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/wayne-and-william-white-engineering-design-centre-edc/",
+      "checked_at": "2026-11-08T04:33:54.669Z",
+      "address": "2345 East Mall, Vancouver, BC V6T 1Z4"
+    },
+    {
+      "source_url": "https://learningspaces.ubc.ca/buildings/west-mall-swing-space-building-swng/",
+      "checked_at": "2026-11-08T04:33:54.711Z",
+      "address": "2175 West Mall, Vancouver, BC V6T 1Z4"
+    }
+  ],
+  "records": [
+    {
+      "room_id": "ubc-alrd-1st-floor",
+      "directory_record_id": "recHAoptvnHYWcp2o",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-1st-floor",
+      "detail_checked_at": "2026-11-08T04:33:07.132Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "directory_capacity": 100,
+      "detail_capacity": 100,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-alrd-2nd-floor-lounge",
+      "directory_record_id": "rec7gqsEh8GAQkiat",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-2nd-floor-lounge",
+      "detail_checked_at": "2026-11-08T04:33:07.184Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "directory_capacity": 38,
+      "detail_capacity": 38,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-alrd-3rd-floor-lounge",
+      "directory_record_id": "recAVMGdX0QxyOXz6",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-3rd-floor-lounge",
+      "detail_checked_at": "2026-11-08T04:33:07.131Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "directory_capacity": 60,
+      "detail_capacity": 60,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-alrd-4th-floor-facultyterrace-lounge",
+      "directory_record_id": "recZbQWJBdEdvgoIz",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-4th-floor-facultyterrace-lounge",
+      "detail_checked_at": "2026-11-08T04:33:07.620Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "directory_capacity": 16,
+      "detail_capacity": 16,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-alrd-franklin-lew-forum-room-101",
+      "directory_record_id": "rec51rDNEuaM29Zro",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-franklin-lew-forum-room-101",
+      "detail_checked_at": "2026-11-08T04:33:07.932Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/allard-hall-alrd/",
+      "directory_capacity": 32,
+      "detail_capacity": 32,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-angu-bruce-r-birmingham-undergraduate-centre",
+      "directory_record_id": "recAXH2nM6ofHUwXJ",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/angu-bruce-r-birmingham-undergraduate-centre",
+      "detail_checked_at": "2026-11-08T04:33:07.504Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/henry-angus-building-angu/",
+      "directory_capacity": 50,
+      "detail_capacity": 50,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-angu-concourse",
+      "directory_record_id": "rec9xPjPPK9R30gAS",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/angu-concourse",
+      "detail_checked_at": "2026-11-08T04:33:08.377Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/henry-angus-building-angu/",
+      "directory_capacity": 24,
+      "detail_capacity": 24,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-biol-basement-study-tables",
+      "directory_record_id": "recOMFEkZR4rvFf8W",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/biol-basement-study-tables",
+      "detail_checked_at": "2026-11-08T04:33:08.681Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/biological-sciences-building-biol/",
+      "directory_capacity": 24,
+      "detail_capacity": 24,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-brck-concourse",
+      "directory_record_id": "recTIvQNGv8Q3ITbR",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brck-concourse",
+      "detail_checked_at": "2026-11-08T04:33:08.977Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/brock-hall-brck/",
+      "directory_capacity": 30,
+      "detail_capacity": 30,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-brck-study-carrels",
+      "directory_record_id": "recOXJvIqXiWFaT6T",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brck-study-carrels",
+      "detail_checked_at": "2026-11-08T04:33:08.996Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/brock-hall-brck/",
+      "directory_capacity": 12,
+      "detail_capacity": 12,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-brcs-atrium",
+      "directory_record_id": "recuIhP4ocE0sQgoG",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brcs-atrium",
+      "detail_checked_at": "2026-11-08T04:33:09.280Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/brock-commons-south-brcs/",
+      "directory_capacity": 42,
+      "detail_capacity": 42,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-buch-a-block-alcove-lounge",
+      "directory_record_id": "recP1HxTLqpfk0NIV",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-a-block-alcove-lounge",
+      "detail_checked_at": "2026-11-08T04:33:10.043Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "directory_capacity": 16,
+      "detail_capacity": 16,
+      "flags": [
+        {
+          "kind": "capacity_scope",
+          "resolution": "Keep published capacity 16. The overview describes 8 lounge seats plus additional bench seating, not an alternative total."
+        }
+      ]
+    },
+    {
+      "room_id": "ubc-buch-b-block-2nd-floor-lounge",
+      "directory_record_id": "rectJu32H4XKPEuV9",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-b-block-2nd-floor-lounge",
+      "detail_checked_at": "2026-11-08T04:33:10.148Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "directory_capacity": 55,
+      "detail_capacity": 55,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-buch-b-block-3rd-floor-lounge",
+      "directory_record_id": "recxh61abP5sVlNhs",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-b-block-3rd-floor-lounge",
+      "detail_checked_at": "2026-11-08T04:33:10.321Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "directory_capacity": 43,
+      "detail_capacity": 43,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-buch-d-block-corridors",
+      "directory_record_id": "recrsuRTtJlyXXwAO",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-d-block-corridors",
+      "detail_checked_at": "2026-11-08T04:33:10.706Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "directory_capacity": 6,
+      "detail_capacity": 6,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-buch-stir-it-up-cafe",
+      "directory_record_id": "recWu7dsXUV2qMK0B",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-stir-it-up-cafe",
+      "detail_checked_at": "2026-11-08T04:33:10.774Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/buchanan-building-buch/",
+      "directory_capacity": 64,
+      "detail_capacity": 64,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-ceme-various-informal-learning-spaces",
+      "directory_record_id": "rec6Ra7trvOusAkCA",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/ceme-various-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:11.313Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/civil-and-mechanical-engineering-building-ceme/",
+      "directory_capacity": 20,
+      "detail_capacity": 20,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-chbe-atrium",
+      "directory_record_id": "recZUzQJROrLlL9rZ",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/chbe-atrium",
+      "detail_checked_at": "2026-11-08T04:33:11.780Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/chemical-and-biological-engineering-building-chbe/",
+      "directory_capacity": 24,
+      "detail_capacity": 24,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-cirs-2nd-floor-bridge",
+      "directory_record_id": "recmU2okvoK3gh5BS",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/cirs-2nd-floor-bridge",
+      "detail_checked_at": "2026-11-08T04:33:11.813Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/centre-for-interactive-research-on-sustainability-cirs/",
+      "directory_capacity": 17,
+      "detail_capacity": 17,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-cirs-concourse",
+      "directory_record_id": "recfowvQlccOQmmLE",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/cirs-concourse",
+      "detail_checked_at": "2026-11-08T04:33:12.002Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/centre-for-interactive-research-on-sustainability-cirs/",
+      "directory_capacity": 6,
+      "detail_capacity": 6,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-dmp-1st-and-2nd-floor-corridors",
+      "directory_record_id": "recZc9zor9nJ8wCqY",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/dmp-1st-and-2nd-floor-corridors",
+      "detail_checked_at": "2026-11-08T04:33:12.782Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hugh-dempster-pavilion-dmp/",
+      "directory_capacity": 10,
+      "detail_capacity": 10,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-edc-various-informal-learning-spaces",
+      "directory_record_id": "recyr4titaWQ0lp1Q",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/edc-various-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:12.189Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/wayne-and-william-white-engineering-design-centre-edc/",
+      "directory_capacity": 140,
+      "detail_capacity": 140,
+      "flags": [
+        {
+          "kind": "approximate_capacity",
+          "resolution": "Use the published Capacity field (140); overview describes more than 140 seats across the building."
+        }
+      ]
+    },
+    {
+      "room_id": "ubc-esb-concourse",
+      "directory_record_id": "recJ8LYIrOe9nN9vs",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/esb-concourse",
+      "detail_checked_at": "2026-11-08T04:33:12.684Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/earth-sciences-building-esb/",
+      "directory_capacity": 75,
+      "detail_capacity": 75,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-esb-magma-cafe",
+      "directory_record_id": "recEXvdk5uhC8M8Sf",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/esb-magma-cafe",
+      "detail_checked_at": "2026-11-08T04:33:12.827Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/earth-sciences-building-esb/",
+      "directory_capacity": 55,
+      "detail_capacity": 55,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-fnh-3rd-floor",
+      "directory_record_id": "rec5S5TTRS2DphtLi",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-3rd-floor",
+      "detail_checked_at": "2026-11-08T04:33:12.952Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/food-nutrition-and-health-building-fnh/",
+      "directory_capacity": 20,
+      "detail_capacity": 20,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-fnh-basement-corridor",
+      "directory_record_id": "recXcxWoVXM8RBM1E",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-basement-corridor",
+      "detail_checked_at": "2026-11-08T04:33:13.568Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/food-nutrition-and-health-building-fnh/",
+      "directory_capacity": 15,
+      "detail_capacity": 15,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-fnh-concourse",
+      "directory_record_id": "recvskFnEnxCwWKWH",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-concourse",
+      "detail_checked_at": "2026-11-08T04:33:13.635Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/food-nutrition-and-health-building-fnh/",
+      "directory_capacity": 16,
+      "detail_capacity": 16,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-fnh-hallway-informal-learning-spaces",
+      "directory_record_id": "recjQuBUZPI7ZzmYr",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-hallway-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:13.745Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/food-nutrition-and-health-building-fnh/",
+      "directory_capacity": 30,
+      "detail_capacity": 30,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-fsc-macmillan-bloedel-atrium",
+      "directory_record_id": "reczWVPDiv13er8Wk",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fsc-macmillan-bloedel-atrium",
+      "detail_checked_at": "2026-11-08T04:33:14.783Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/forest-sciences-centre-fsc/",
+      "directory_capacity": 60,
+      "detail_capacity": 60,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-geog-student-lounge",
+      "directory_record_id": "reci9vkTqOEz4yMwJ",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/geog-student-lounge",
+      "detail_checked_at": "2026-11-08T04:33:14.761Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/geography-building-geog/",
+      "directory_capacity": 18,
+      "detail_capacity": 18,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-gwhb-1st-floor-lounge",
+      "directory_record_id": "recaqy3esYfasnpXz",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/gwhb-1st-floor-lounge",
+      "detail_checked_at": "2026-11-08T04:33:15.247Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/macisaac-health-building-gwhb/",
+      "directory_capacity": 46,
+      "detail_capacity": 46,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-gwhb-3rd-4th-5th-6th-floor-hallways-and-atrium",
+      "directory_record_id": "recQklgNmxIgcPZQ1",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/gwhb-3rd-4th-5th-6th-floor-hallways-and-atrium",
+      "detail_checked_at": "2026-11-08T04:33:15.595Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/macisaac-health-building-gwhb/",
+      "directory_capacity": 50,
+      "detail_capacity": 50,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-hebb-concourse",
+      "directory_record_id": "recRT6UTNDOOBUyIW",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/hebb-concourse",
+      "detail_checked_at": "2026-11-08T04:33:15.045Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hebb-building-hebb/",
+      "directory_capacity": 10,
+      "detail_capacity": 10,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-henn-2nd-floor-hallways",
+      "directory_record_id": "rechQV6GJC6pMp0Zi",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/henn-2nd-floor-hallways",
+      "detail_checked_at": "2026-11-08T04:33:15.294Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hennings-building-henn/",
+      "directory_capacity": 62,
+      "detail_capacity": 62,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-henn-foyer",
+      "directory_record_id": "rechxV1MHiihiPjOY",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/henn-foyer",
+      "detail_checked_at": "2026-11-08T04:33:15.742Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hennings-building-henn/",
+      "directory_capacity": 42,
+      "detail_capacity": 42,
+      "flags": [
+        {
+          "kind": "conflicting_capacity",
+          "published_capacity": 42,
+          "overview_seats": 34,
+          "resolution": "Leave total_capacity null pending UBC clarification."
+        }
+      ]
+    },
+    {
+      "room_id": "ubc-iccs-various-informal-learning-spaces",
+      "directory_record_id": "recFS2SgPazHNQbYY",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/iccs-various-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:16.278Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/institute-for-computing-information-and-cognitive-systems-computer-science-building-iccs/",
+      "directory_capacity": 300,
+      "detail_capacity": 300,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-iona-study-lounge",
+      "directory_record_id": "recOUNbqHQXDuY3Ih",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/iona-study-lounge",
+      "detail_checked_at": "2026-11-08T04:33:15.861Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/iona-building-iona/",
+      "directory_capacity": 56,
+      "detail_capacity": 56,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-irc-concourse",
+      "directory_record_id": "recHEE5DcspbxncJq",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/irc-concourse",
+      "detail_checked_at": "2026-11-08T04:33:16.352Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/p-a-woodward-instructional-resources-centre-irc/",
+      "directory_capacity": 75,
+      "detail_capacity": 75,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-kais-concourse",
+      "directory_record_id": "recrlYSDW1i91HzlH",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/kais-concourse",
+      "detail_checked_at": "2026-11-08T04:33:17.040Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/fred-kaiser-building-kais/",
+      "directory_capacity": 58,
+      "detail_capacity": 58,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-lasr-cube",
+      "directory_record_id": "recyuv72bZH4ASyQF",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lasr-cube",
+      "detail_checked_at": "2026-11-08T04:33:16.902Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/frederic-lasserre-building-lasr/",
+      "directory_capacity": 20,
+      "detail_capacity": 20,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-life-2nd-floor-concourse",
+      "directory_record_id": "recZYL7sSCeCbE66w",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/life-2nd-floor-concourse",
+      "detail_checked_at": "2026-11-08T04:33:16.990Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/ubc-life-building-life/",
+      "directory_capacity": 44,
+      "detail_capacity": 44,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-lsc-east-atrium",
+      "directory_record_id": "recAVuQm7k2qgKHJT",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-east-atrium",
+      "detail_checked_at": "2026-11-08T04:33:17.175Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/life-sciences-centre-lsc/",
+      "directory_capacity": 170,
+      "detail_capacity": 170,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-lsc-perugia-cafe",
+      "directory_record_id": "recfVyZYY7RlnajW7",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-perugia-cafe",
+      "detail_checked_at": "2026-11-08T04:33:17.599Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/life-sciences-centre-lsc/",
+      "directory_capacity": 36,
+      "detail_capacity": 36,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-lsc-west-atrium",
+      "directory_record_id": "recoK4q1JNRn3jCjr",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-west-atrium",
+      "detail_checked_at": "2026-11-08T04:33:17.367Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/life-sciences-centre-lsc/",
+      "directory_capacity": 110,
+      "detail_capacity": 110,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-matx-2nd-floor-study-tables",
+      "directory_record_id": "recKLEKXjVogxIAA7",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/matx-2nd-floor-study-tables",
+      "detail_checked_at": "2026-11-08T04:33:18.181Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/mathematics-annex-matx/",
+      "directory_capacity": 8,
+      "detail_capacity": 8,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-mcld-various-informal-learning-spaces",
+      "directory_record_id": "recpHIAighb1DgHvr",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mcld-various-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:17.994Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hector-j-macleod-building-mcld/",
+      "directory_capacity": 64,
+      "detail_capacity": 64,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-mcml-1st-floor-corridor",
+      "directory_record_id": "recRt49qiVqqEWvqD",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mcml-1st-floor-corridor",
+      "detail_checked_at": "2026-11-08T04:33:18.784Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hr-macmillan-building-mcml/",
+      "directory_capacity": 10,
+      "detail_capacity": 10,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-mcml-agora-cafe",
+      "directory_record_id": "recX8Aytl8BwqdduG",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mcml-agora-cafe",
+      "detail_checked_at": "2026-11-08T04:33:18.722Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/hr-macmillan-building-mcml/",
+      "directory_capacity": 109,
+      "detail_capacity": 109,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-mgym-atrium",
+      "directory_record_id": "recdGDfC7V9YMd4xy",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mgym-atrium",
+      "detail_checked_at": "2026-11-08T04:33:18.672Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/war-memorial-gymnasium-mgym/",
+      "directory_capacity": 10,
+      "detail_capacity": 10,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-nest-various-informal-learning-spaces",
+      "directory_record_id": "reczcsiZDNqkpfMbb",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/nest-various-informal-learning-spaces",
+      "detail_checked_at": "2026-11-08T04:33:19.086Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/ams-student-nest-nest/",
+      "directory_capacity": 300,
+      "detail_capacity": 300,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-orch-3rd-floor-high-tech-study-nook",
+      "directory_record_id": "reciZ8EhNVAFog2pb",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-3rd-floor-high-tech-study-nook",
+      "detail_checked_at": "2026-11-08T04:33:19.705Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/orchard-commons-orch/",
+      "directory_capacity": 16,
+      "detail_capacity": 16,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-orch-4th-floor-high-tech-study-nook",
+      "directory_record_id": "recbtHK6XH53QCbDD",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-4th-floor-high-tech-study-nook",
+      "detail_checked_at": "2026-11-08T04:33:20.033Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/orchard-commons-orch/",
+      "directory_capacity": 14,
+      "detail_capacity": 14,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-orch-dining-hall",
+      "directory_record_id": "recZNIgIrTCncRMNj",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-dining-hall",
+      "detail_checked_at": "2026-11-08T04:33:19.761Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/orchard-commons-orch/",
+      "directory_capacity": 100,
+      "detail_capacity": 100,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-orch-study-lounge",
+      "directory_record_id": "recL6Ex3sYq1Vi63H",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-study-lounge",
+      "detail_checked_at": "2026-11-08T04:33:20.517Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/orchard-commons-orch/",
+      "directory_capacity": 40,
+      "detail_capacity": 40,
+      "flags": [
+        {
+          "kind": "capacity_scope",
+          "resolution": "Keep published lounge capacity 40. The overview separately mentions 12 seats outside the lounge; do not add them."
+        }
+      ]
+    },
+    {
+      "room_id": "ubc-pcw-mercante-cafe",
+      "directory_record_id": "recXTpOgzMglEi3hL",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/pcw-mercante-cafe",
+      "detail_checked_at": "2026-11-08T04:33:21.010Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/ponderosa-commons-west-pcw/",
+      "directory_capacity": 36,
+      "detail_capacity": 36,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-pcw-rooms-2108-2109-2111",
+      "directory_record_id": "recvao2zHIersvmnF",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/pcw-rooms-2108-2109-2111",
+      "detail_checked_at": "2026-11-08T04:33:21.076Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/ponderosa-commons-west-pcw/",
+      "directory_capacity": 12,
+      "detail_capacity": 12,
+      "flags": [
+        {
+          "kind": "grouped_space",
+          "resolution": "Retain one directory entry with its published capacity of 12; do not assign 12 seats to each room."
+        }
+      ]
+    },
+    {
+      "room_id": "ubc-phrm-3rd-floor",
+      "directory_record_id": "recMEYgbZdLxn5w4c",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-3rd-floor",
+      "detail_checked_at": "2026-11-08T04:33:21.495Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/pharmaceutical-sciences-building-phrm/",
+      "directory_capacity": 50,
+      "detail_capacity": 50,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-phrm-concourse",
+      "directory_record_id": "rec48L7R3Agd0Kny3",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-concourse",
+      "detail_checked_at": "2026-11-08T04:33:21.636Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/pharmaceutical-sciences-building-phrm/",
+      "directory_capacity": 110,
+      "detail_capacity": 110,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-phrm-mezzanine",
+      "directory_record_id": "recRGanAwomTk8uLA",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-mezzanine",
+      "detail_checked_at": "2026-11-08T04:33:21.375Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/pharmaceutical-sciences-building-phrm/",
+      "directory_capacity": 45,
+      "detail_capacity": 45,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-phrm-study-nook",
+      "directory_record_id": "reclHwiOHxhwz00cG",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-study-nook",
+      "detail_checked_at": "2026-11-08T04:33:22.015Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/pharmaceutical-sciences-building-phrm/",
+      "directory_capacity": 25,
+      "detail_capacity": 25,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-scrf-hallway-informal-learning-space",
+      "directory_record_id": "recEMaO6qTg4XnjQo",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/scrf-hallway-informal-learning-space",
+      "detail_checked_at": "2026-11-08T04:33:22.535Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/neville-scarfe-building-scrf/",
+      "directory_capacity": 55,
+      "detail_capacity": 55,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-shrm-2nd-floor-study-space",
+      "directory_record_id": "recRak383oxIRMgxo",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/shrm-2nd-floor-study-space",
+      "detail_checked_at": "2026-11-08T04:33:22.261Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/gordon-b-shrum-building-shrm/",
+      "directory_capacity": 55,
+      "detail_capacity": 55,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-shrm-basement-foyer",
+      "directory_record_id": "rec5ahPFOYzneUt5c",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/shrm-basement-foyer",
+      "detail_checked_at": "2026-11-08T04:33:22.332Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/gordon-b-shrum-building-shrm/",
+      "directory_capacity": 50,
+      "detail_capacity": 50,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-sowk-1st-floor-study-space",
+      "directory_record_id": "recsAe2BYpqU45Jzd",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/sowk-1st-floor-study-space",
+      "detail_checked_at": "2026-11-08T04:33:23.409Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/jack-bell-building-for-the-school-of-social-work-sowk/",
+      "directory_capacity": 18,
+      "detail_capacity": 18,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-sowk-basement-study-space",
+      "directory_record_id": "reclgbqIIbqEFk1SI",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/sowk-basement-study-space",
+      "detail_checked_at": "2026-11-08T04:33:23.428Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/jack-bell-building-for-the-school-of-social-work-sowk/",
+      "directory_capacity": 20,
+      "detail_capacity": 20,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-spph-basement-study-area",
+      "directory_record_id": "rec2B81jfBy0cdV6z",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/spph-basement-study-area",
+      "detail_checked_at": "2026-11-08T04:33:23.587Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/school-of-population-&-public-health-spph/",
+      "directory_capacity": 12,
+      "detail_capacity": 12,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-swng-1st-floor-concourse",
+      "directory_record_id": "rec2TreFXYoptBJni",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/swng-1st-floor-concourse",
+      "detail_checked_at": "2026-11-08T04:33:24.486Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/west-mall-swing-space-building-swng/",
+      "directory_capacity": 10,
+      "detail_capacity": 10,
+      "flags": []
+    },
+    {
+      "room_id": "ubc-swng-2nd-floor-concourse",
+      "directory_record_id": "recSw3wIcVplmXSk6",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/swng-2nd-floor-concourse",
+      "detail_checked_at": "2026-11-08T04:33:24.510Z",
+      "building_source_url": "https://learningspaces.ubc.ca/buildings/west-mall-swing-space-building-swng/",
+      "directory_capacity": 32,
+      "detail_capacity": 32,
+      "flags": []
+    }
+  ]
+}
