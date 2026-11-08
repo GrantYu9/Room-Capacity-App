@@ -1,6 +1,7 @@
 import { memo, useState } from "react";
 import { ArrowUpRight, BookOpen, MapPin, Search } from "lucide-react";
 import roomPhotos from "../data/room-images.json";
+import { matchesRoomSearch } from "./roomSearch.js";
 
 function UnmonitoredSpaces({ rooms }) {
   const [query, setQuery] = useState("");
@@ -9,8 +10,7 @@ function UnmonitoredSpaces({ rooms }) {
   const buildings = [...new Set(rooms.map((room) => room.building).filter(Boolean))].sort();
   const filtered = rooms.filter((room) =>
     (building === "all" || room.building === building) &&
-    [room.name, room.building, room.room_number, room.address]
-      .filter(Boolean).join(" ").toLowerCase().includes(query.trim().toLowerCase()),
+    matchesRoomSearch(room, query),
   );
   const visible = filtered.slice(0, limit);
 
@@ -34,7 +34,7 @@ function UnmonitoredSpaces({ rooms }) {
           <span className="sr-only">Search unmonitored study spaces</span>
           <input
             type="search"
-            placeholder="Search the directory by space, building, or address"
+            placeholder="Search by space, building, or alias (e.g. Sauder)"
             value={query}
             onChange={(event) => { setQuery(event.target.value); setLimit(12); }}
           />

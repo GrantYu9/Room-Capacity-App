@@ -29,7 +29,7 @@ The existing Tiger service has already been initialized for this project. `db:in
 ## Frontend behavior
 
 - Polls room data every 10 seconds, with a 12-second request timeout and a manual retry action.
-- Search by room name, building, room number, or address. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
+- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases shared by monitored and unmonitored search. Room numbers stay exact. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
 - Favourites are saved in the visitor's browser. Counts reflect only rooms in the current live/sample view.
 - Missing capacity is **unknown**, never zero. Available seats are calculated only from fresh readings and known capacity. Counts over capacity are preserved.
 - Delayed readings are excluded from current availability and people totals. The API's `stale_after_seconds` controls freshness.

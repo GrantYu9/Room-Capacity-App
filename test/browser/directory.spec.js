@@ -82,3 +82,50 @@ test('UBC photos load locally and missing photos have a labelled placeholder', a
   await section.getByRole('heading', { name: 'Unmonitored study spaces' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: testInfo.outputPath(`directory-${testInfo.project.name}.png`) });
 });
+
+test('directory aliases and fuzzy search work with building filters', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/');
+  const section = directory(page);
+  const search = section.getByRole('searchbox');
+  for (const query of ['sauder', 'saudre', 'business sauder']) {
+    await search.fill(query);
+    await expect(section.getByRole('listitem')).toHaveCount(2);
+    for (const item of await section.getByRole('listitem').all()) {
+      await expect(item).toContainText('ANGU');
+    }
+  }
+  await section.getByRole('combobox', { name: 'Unmonitored building' }).selectOption('Allard Hall');
+  await expect(section.getByRole('listitem')).toHaveCount(0);
+  await section.getByRole('combobox', { name: 'Unmonitored building' }).selectOption('all');
+  for (const query of ['atrium', 'atrim']) {
+    await search.fill(query);
+    await expect(section.getByRole('listitem')).toHaveCount(7);
+    for (const item of await section.getByRole('listitem').all()) {
+      await expect(item).toContainText(/Atrium/);
+    }
+  }
+  await search.fill('cafe');
+  await expect(section.getByRole('listitem')).toHaveCount(catalog.filter(room => /café/i.test(room.name)).length);
+  await noOverflow(page);
+});
+
+test('monitored rooms share alias search while keeping availability and quiet filters', async ({ page }) => {
+  const rooms = catalog.filter(room => room.building === 'Henry Angus Building').map((room, index) => ({
+    ...room,
+    location: { building: room.building, room_number: room.room_number, address: room.address },
+    latest_reading: { measured_at: new Date().toISOString(), people_count: index ? room.total_capacity : 2, noise_level: index ? 0.8 : 0.1, noise_unit: 'relative' },
+  }));
+  await mockApi(page, rooms);
+  await page.goto('/');
+  const search = page.getByRole('searchbox', { name: 'Search study spaces', exact: true });
+  await search.fill('saudre');
+  await expect(page.getByRole('article')).toHaveCount(2);
+  const filters = page.getByRole('group', { name: 'Filter spaces' });
+  await filters.getByRole('button', { name: /Space available/ }).click();
+  await expect(page.getByRole('article')).toHaveCount(1);
+  await filters.getByRole('button', { name: /Quiet spaces/ }).click();
+  await expect(page.getByRole('article')).toHaveCount(1);
+  await search.fill('no matching place');
+  await expect(page.getByRole('article')).toHaveCount(0);
+});
