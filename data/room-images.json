@@ -1,0 +1,345 @@
+{
+  "images": {
+    "ubc-alrd-1st-floor": {
+      "path": "/images/study-spaces/alrd-1st-floor.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-1st-floor",
+      "downloaded_at": "2026-11-08T04:47:57.665Z"
+    },
+    "ubc-alrd-2nd-floor-lounge": {
+      "path": "/images/study-spaces/alrd-2nd-floor-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-2nd-floor-lounge",
+      "downloaded_at": "2026-11-08T04:47:57.681Z"
+    },
+    "ubc-alrd-3rd-floor-lounge": {
+      "path": "/images/study-spaces/alrd-3rd-floor-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-3rd-floor-lounge",
+      "downloaded_at": "2026-11-08T04:47:57.659Z"
+    },
+    "ubc-alrd-4th-floor-facultyterrace-lounge": {
+      "path": "/images/study-spaces/alrd-4th-floor-facultyterrace-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-4th-floor-facultyterrace-lounge",
+      "downloaded_at": "2026-11-08T04:47:58.201Z"
+    },
+    "ubc-alrd-franklin-lew-forum-room-101": {
+      "path": "/images/study-spaces/alrd-franklin-lew-forum-room-101.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/alrd-franklin-lew-forum-room-101",
+      "downloaded_at": "2026-11-08T04:47:58.245Z"
+    },
+    "ubc-angu-bruce-r-birmingham-undergraduate-centre": {
+      "path": "/images/study-spaces/angu-bruce-r-birmingham-undergraduate-centre.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/angu-bruce-r-birmingham-undergraduate-centre",
+      "downloaded_at": "2026-11-08T04:47:58.122Z"
+    },
+    "ubc-angu-concourse": {
+      "path": "/images/study-spaces/angu-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/angu-concourse",
+      "downloaded_at": "2026-11-08T04:47:58.688Z"
+    },
+    "ubc-biol-basement-study-tables": {
+      "path": "/images/study-spaces/biol-basement-study-tables.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/biol-basement-study-tables",
+      "downloaded_at": "2026-11-08T04:47:58.642Z"
+    },
+    "ubc-brck-concourse": {
+      "path": "/images/study-spaces/brck-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brck-concourse",
+      "downloaded_at": "2026-11-08T04:47:58.694Z"
+    },
+    "ubc-brck-study-carrels": {
+      "path": "/images/study-spaces/brck-study-carrels.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brck-study-carrels",
+      "downloaded_at": "2026-11-08T04:47:59.109Z"
+    },
+    "ubc-brcs-atrium": {
+      "path": "/images/study-spaces/brcs-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/brcs-atrium",
+      "downloaded_at": "2026-11-08T04:47:59.195Z"
+    },
+    "ubc-buch-a-block-alcove-lounge": {
+      "path": "/images/study-spaces/buch-a-block-alcove-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-a-block-alcove-lounge",
+      "downloaded_at": "2026-11-08T04:47:59.228Z"
+    },
+    "ubc-buch-b-block-2nd-floor-lounge": {
+      "path": "/images/study-spaces/buch-b-block-2nd-floor-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-b-block-2nd-floor-lounge",
+      "downloaded_at": "2026-11-08T04:47:59.681Z"
+    },
+    "ubc-buch-b-block-3rd-floor-lounge": {
+      "path": "/images/study-spaces/buch-b-block-3rd-floor-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-b-block-3rd-floor-lounge",
+      "downloaded_at": "2026-11-08T04:47:59.773Z"
+    },
+    "ubc-buch-d-block-corridors": {
+      "path": "/images/study-spaces/buch-d-block-corridors.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-d-block-corridors",
+      "downloaded_at": "2026-11-08T04:47:59.689Z"
+    },
+    "ubc-buch-stir-it-up-cafe": {
+      "path": "/images/study-spaces/buch-stir-it-up-cafe.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/buch-stir-it-up-cafe",
+      "downloaded_at": "2026-11-08T04:48:00.162Z"
+    },
+    "ubc-ceme-various-informal-learning-spaces": {
+      "path": "/images/study-spaces/ceme-various-informal-learning-spaces.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/ceme-various-informal-learning-spaces",
+      "downloaded_at": "2026-11-08T04:48:00.131Z"
+    },
+    "ubc-chbe-atrium": {
+      "path": "/images/study-spaces/chbe-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/chbe-atrium",
+      "downloaded_at": "2026-11-08T04:48:00.272Z"
+    },
+    "ubc-cirs-2nd-floor-bridge": {
+      "path": "/images/study-spaces/cirs-2nd-floor-bridge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/cirs-2nd-floor-bridge",
+      "downloaded_at": "2026-11-08T04:48:00.649Z"
+    },
+    "ubc-cirs-concourse": {
+      "path": "/images/study-spaces/cirs-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/cirs-concourse",
+      "downloaded_at": "2026-11-08T04:48:00.792Z"
+    },
+    "ubc-dmp-1st-and-2nd-floor-corridors": {
+      "path": "/images/study-spaces/dmp-1st-and-2nd-floor-corridors.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/dmp-1st-and-2nd-floor-corridors",
+      "downloaded_at": "2026-11-08T04:48:00.769Z"
+    },
+    "ubc-edc-various-informal-learning-spaces": {
+      "path": "/images/study-spaces/edc-various-informal-learning-spaces.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/edc-various-informal-learning-spaces",
+      "downloaded_at": "2026-11-08T04:48:01.179Z"
+    },
+    "ubc-esb-concourse": {
+      "path": "/images/study-spaces/esb-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/esb-concourse",
+      "downloaded_at": "2026-11-08T04:48:01.373Z"
+    },
+    "ubc-esb-magma-cafe": {
+      "path": "/images/study-spaces/esb-magma-cafe.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/esb-magma-cafe",
+      "downloaded_at": "2026-11-08T04:48:01.354Z"
+    },
+    "ubc-fnh-3rd-floor": {
+      "path": "/images/study-spaces/fnh-3rd-floor.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-3rd-floor",
+      "downloaded_at": "2026-11-08T04:48:01.690Z"
+    },
+    "ubc-fnh-basement-corridor": {
+      "path": "/images/study-spaces/fnh-basement-corridor.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-basement-corridor",
+      "downloaded_at": "2026-11-08T04:48:01.814Z"
+    },
+    "ubc-fnh-concourse": {
+      "path": "/images/study-spaces/fnh-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-concourse",
+      "downloaded_at": "2026-11-08T04:48:01.926Z"
+    },
+    "ubc-fnh-hallway-informal-learning-spaces": {
+      "path": "/images/study-spaces/fnh-hallway-informal-learning-spaces.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fnh-hallway-informal-learning-spaces",
+      "downloaded_at": "2026-11-08T04:48:02.243Z"
+    },
+    "ubc-fsc-macmillan-bloedel-atrium": {
+      "path": "/images/study-spaces/fsc-macmillan-bloedel-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/fsc-macmillan-bloedel-atrium",
+      "downloaded_at": "2026-11-08T04:48:02.368Z"
+    },
+    "ubc-geog-student-lounge": {
+      "path": "/images/study-spaces/geog-student-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/geog-student-lounge",
+      "downloaded_at": "2026-11-08T04:48:02.433Z"
+    },
+    "ubc-gwhb-1st-floor-lounge": {
+      "path": "/images/study-spaces/gwhb-1st-floor-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/gwhb-1st-floor-lounge",
+      "downloaded_at": "2026-11-08T04:48:02.741Z"
+    },
+    "ubc-gwhb-3rd-4th-5th-6th-floor-hallways-and-atrium": {
+      "path": "/images/study-spaces/gwhb-3rd-4th-5th-6th-floor-hallways-and-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/gwhb-3rd-4th-5th-6th-floor-hallways-and-atrium",
+      "downloaded_at": "2026-11-08T04:48:02.889Z"
+    },
+    "ubc-hebb-concourse": {
+      "path": "/images/study-spaces/hebb-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/hebb-concourse",
+      "downloaded_at": "2026-11-08T04:48:02.857Z"
+    },
+    "ubc-henn-2nd-floor-hallways": {
+      "path": "/images/study-spaces/henn-2nd-floor-hallways.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/henn-2nd-floor-hallways",
+      "downloaded_at": "2026-11-08T04:48:03.145Z"
+    },
+    "ubc-henn-foyer": {
+      "path": "/images/study-spaces/henn-foyer.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/henn-foyer",
+      "downloaded_at": "2026-11-08T04:48:03.278Z"
+    },
+    "ubc-iccs-various-informal-learning-spaces": {
+      "path": "/images/study-spaces/iccs-various-informal-learning-spaces.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/iccs-various-informal-learning-spaces",
+      "downloaded_at": "2026-11-08T04:48:03.400Z"
+    },
+    "ubc-iona-study-lounge": {
+      "path": "/images/study-spaces/iona-study-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/iona-study-lounge",
+      "downloaded_at": "2026-11-08T04:48:03.763Z"
+    },
+    "ubc-irc-concourse": {
+      "path": "/images/study-spaces/irc-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/irc-concourse",
+      "downloaded_at": "2026-11-08T04:48:03.793Z"
+    },
+    "ubc-kais-concourse": {
+      "path": "/images/study-spaces/kais-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/kais-concourse",
+      "downloaded_at": "2026-11-08T04:48:03.932Z"
+    },
+    "ubc-lasr-cube": {
+      "path": "/images/study-spaces/lasr-cube.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lasr-cube",
+      "downloaded_at": "2026-11-08T04:48:04.270Z"
+    },
+    "ubc-life-2nd-floor-concourse": {
+      "path": "/images/study-spaces/life-2nd-floor-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/life-2nd-floor-concourse",
+      "downloaded_at": "2026-11-08T04:48:04.265Z"
+    },
+    "ubc-lsc-east-atrium": {
+      "path": "/images/study-spaces/lsc-east-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-east-atrium",
+      "downloaded_at": "2026-11-08T04:48:04.475Z"
+    },
+    "ubc-lsc-perugia-cafe": {
+      "path": "/images/study-spaces/lsc-perugia-cafe.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-perugia-cafe",
+      "downloaded_at": "2026-11-08T04:48:04.836Z"
+    },
+    "ubc-lsc-west-atrium": {
+      "path": "/images/study-spaces/lsc-west-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/lsc-west-atrium",
+      "downloaded_at": "2026-11-08T04:48:04.853Z"
+    },
+    "ubc-matx-2nd-floor-study-tables": {
+      "path": "/images/study-spaces/matx-2nd-floor-study-tables.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/matx-2nd-floor-study-tables",
+      "downloaded_at": "2026-11-08T04:48:04.893Z"
+    },
+    "ubc-mcml-1st-floor-corridor": {
+      "path": "/images/study-spaces/mcml-1st-floor-corridor.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mcml-1st-floor-corridor",
+      "downloaded_at": "2026-11-08T04:48:05.403Z"
+    },
+    "ubc-mcml-agora-cafe": {
+      "path": "/images/study-spaces/mcml-agora-cafe.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mcml-agora-cafe",
+      "downloaded_at": "2026-11-08T04:48:05.374Z"
+    },
+    "ubc-mgym-atrium": {
+      "path": "/images/study-spaces/mgym-atrium.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/mgym-atrium",
+      "downloaded_at": "2026-11-08T04:48:05.447Z"
+    },
+    "ubc-nest-various-informal-learning-spaces": {
+      "path": "/images/study-spaces/nest-various-informal-learning-spaces.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/nest-various-informal-learning-spaces",
+      "downloaded_at": "2026-11-08T04:48:05.939Z"
+    },
+    "ubc-orch-3rd-floor-high-tech-study-nook": {
+      "path": "/images/study-spaces/orch-3rd-floor-high-tech-study-nook.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-3rd-floor-high-tech-study-nook",
+      "downloaded_at": "2026-11-08T04:48:05.941Z"
+    },
+    "ubc-orch-4th-floor-high-tech-study-nook": {
+      "path": "/images/study-spaces/orch-4th-floor-high-tech-study-nook.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-4th-floor-high-tech-study-nook",
+      "downloaded_at": "2026-11-08T04:48:06.004Z"
+    },
+    "ubc-orch-dining-hall": {
+      "path": "/images/study-spaces/orch-dining-hall.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-dining-hall",
+      "downloaded_at": "2026-11-08T04:48:06.500Z"
+    },
+    "ubc-orch-study-lounge": {
+      "path": "/images/study-spaces/orch-study-lounge.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/orch-study-lounge",
+      "downloaded_at": "2026-11-08T04:48:06.479Z"
+    },
+    "ubc-pcw-mercante-cafe": {
+      "path": "/images/study-spaces/pcw-mercante-cafe.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/pcw-mercante-cafe",
+      "downloaded_at": "2026-11-08T04:48:06.500Z"
+    },
+    "ubc-pcw-rooms-2108-2109-2111": {
+      "path": "/images/study-spaces/pcw-rooms-2108-2109-2111.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/pcw-rooms-2108-2109-2111",
+      "downloaded_at": "2026-11-08T04:48:07.005Z"
+    },
+    "ubc-phrm-3rd-floor": {
+      "path": "/images/study-spaces/phrm-3rd-floor.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-3rd-floor",
+      "downloaded_at": "2026-11-08T04:48:06.940Z"
+    },
+    "ubc-phrm-concourse": {
+      "path": "/images/study-spaces/phrm-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-concourse",
+      "downloaded_at": "2026-11-08T04:48:07.037Z"
+    },
+    "ubc-phrm-mezzanine": {
+      "path": "/images/study-spaces/phrm-mezzanine.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-mezzanine",
+      "downloaded_at": "2026-11-08T04:48:07.415Z"
+    },
+    "ubc-phrm-study-nook": {
+      "path": "/images/study-spaces/phrm-study-nook.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/phrm-study-nook",
+      "downloaded_at": "2026-11-08T04:48:07.547Z"
+    },
+    "ubc-scrf-hallway-informal-learning-space": {
+      "path": "/images/study-spaces/scrf-hallway-informal-learning-space.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/scrf-hallway-informal-learning-space",
+      "downloaded_at": "2026-11-08T04:48:07.613Z"
+    },
+    "ubc-shrm-2nd-floor-study-space": {
+      "path": "/images/study-spaces/shrm-2nd-floor-study-space.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/shrm-2nd-floor-study-space",
+      "downloaded_at": "2026-11-08T04:48:07.954Z"
+    },
+    "ubc-shrm-basement-foyer": {
+      "path": "/images/study-spaces/shrm-basement-foyer.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/shrm-basement-foyer",
+      "downloaded_at": "2026-11-08T04:48:08.036Z"
+    },
+    "ubc-sowk-1st-floor-study-space": {
+      "path": "/images/study-spaces/sowk-1st-floor-study-space.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/sowk-1st-floor-study-space",
+      "downloaded_at": "2026-11-08T04:48:08.166Z"
+    },
+    "ubc-sowk-basement-study-space": {
+      "path": "/images/study-spaces/sowk-basement-study-space.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/sowk-basement-study-space",
+      "downloaded_at": "2026-11-08T04:48:08.472Z"
+    },
+    "ubc-spph-basement-study-area": {
+      "path": "/images/study-spaces/spph-basement-study-area.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/spph-basement-study-area",
+      "downloaded_at": "2026-11-08T04:48:08.528Z"
+    },
+    "ubc-swng-1st-floor-concourse": {
+      "path": "/images/study-spaces/swng-1st-floor-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/swng-1st-floor-concourse",
+      "downloaded_at": "2026-11-08T04:48:08.584Z"
+    },
+    "ubc-swng-2nd-floor-concourse": {
+      "path": "/images/study-spaces/swng-2nd-floor-concourse.jpg",
+      "source_url": "https://learningspaces.ubc.ca/classrooms/swng-2nd-floor-concourse",
+      "downloaded_at": "2026-11-08T04:48:09.020Z"
+    }
+  },
+  "missing": [
+    {
+      "room_id": "ubc-mcld-various-informal-learning-spaces",
+      "reason": "No photo published in directory"
+    }
+  ]
+}
