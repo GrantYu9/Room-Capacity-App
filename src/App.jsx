@@ -35,6 +35,7 @@ import { fetchJson } from "./api.js";
 import directoryRooms from "../data/rooms.json";
 import UnmonitoredSpaces from "./UnmonitoredSpaces.jsx";
 import { splitRoomSources } from "./roomSources.js";
+import { matchesRoomSearch } from "./roomSearch.js";
 
 const filters = [
   { id: "all", label: "All spaces" },
@@ -667,17 +668,8 @@ export default function App() {
           noiseBand(room.latest_reading)?.level === "quiet");
   const filtered = rooms
     .filter((room) => {
-      const text = [
-        room.name,
-        room.location?.building,
-        room.location?.room_number,
-        room.location?.address,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
       return (
-        text.includes(query.trim().toLowerCase()) &&
+        matchesRoomSearch(room, query) &&
         matchesFilter(room, filter) &&
         (building === "all" || room.location?.building === building)
       );
@@ -889,7 +881,7 @@ export default function App() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 aria-label="Search study spaces"
-                placeholder="Search a room, building, or address"
+                placeholder="Search a room, building, alias, or address"
               />
               {query && (
                 <button

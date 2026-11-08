@@ -1,0 +1,15 @@
+[
+  { "code": "ANGU", "building": "Henry Angus Building", "aliases": ["Sauder", "UBC Sauder", "Sauder School of Business", "Commerce"] },
+  { "code": "ALRD", "building": "Allard Hall", "aliases": ["Allard Law", "Law School", "Peter A Allard School of Law"] },
+  { "code": "GWHB", "building": "MacIsaac Health Building", "aliases": ["Gateway", "Gateway Health", "Gateway Health Building", "MacIsaac"] },
+  { "code": "ICCS", "building": "Institute for Computing Information and Cognitive Systems / Computer Science Building", "aliases": ["ICICS", "Computer Science", "CS Building"] },
+  { "code": "NEST", "building": "AMS Student Nest", "aliases": ["AMS Nest", "The Nest", "Student Nest"] },
+  { "code": "LIFE", "building": "UBC Life Building", "aliases": ["Life Building", "UBC Life"] },
+  { "code": "MCLD", "building": "Hector J. MacLeod Building", "aliases": ["MacLeod", "McLeod", "Hector MacLeod"] },
+  { "code": "IRC", "building": "P. A. Woodward Instructional Resources Centre", "aliases": ["Woodward IRC", "Woodward Instructional Resources Center"] },
+  { "code": "FNH", "building": "Food, Nutrition and Health Building", "aliases": ["Food Nutrition Health"] },
+  { "code": "FSC", "building": "Forest Sciences Centre", "aliases": ["Forestry", "Forest Sciences Center"] },
+  { "code": "LSC", "building": "Life Sciences Centre", "aliases": ["Life Sciences Center"] },
+  { "code": "SPPH", "building": "School of Population & Public Health", "aliases": ["Population and Public Health"] },
+  { "code": "SWNG", "building": "West Mall Swing Space Building", "aliases": ["Swing Space", "Swing Building"] }
+]
