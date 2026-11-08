@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { locationLabel } from "../src/rooms.js";
 import {
   availableSeats,
   freshness,
@@ -39,4 +40,17 @@ test("noise bands use the supplied unit and never treat missing readings as quie
     noiseBand({ noise_level: 75, noise_unit: "dBA" }).level,
     "lively",
   );
+});
+
+test("a known address or coordinates are displayed when a building name is missing", () => {
+  assert.equal(
+    locationLabel({ building: "Learning Centre", room_number: "201" }),
+    "Learning Centre · Room 201",
+  );
+  assert.equal(
+    locationLabel({ address: "123 Example Street" }),
+    "123 Example Street",
+  );
+  assert.equal(locationLabel({ latitude: 0, longitude: 0 }), "0.0000, 0.0000");
+  assert.equal(locationLabel({ latitude: null, longitude: null }), "");
 });

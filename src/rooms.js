@@ -8,6 +8,25 @@ export function freshness(room, now, staleAfterSeconds = 60) {
   return "live";
 }
 
+export function locationLabel(location) {
+  if (!location) return "";
+  const building = [
+    location.building,
+    location.room_number ? `Room ${location.room_number}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  if (building) return building;
+  if (location.address) return location.address;
+  if (
+    Number.isFinite(location.latitude) &&
+    Number.isFinite(location.longitude)
+  ) {
+    return `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`;
+  }
+  return "";
+}
+
 export function noiseBand(reading) {
   if (!reading || !Number.isFinite(reading.noise_level)) return null;
   const [low, high] = reading.noise_unit === "dBA" ? [45, 60] : [0.25, 0.6];

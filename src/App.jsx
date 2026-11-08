@@ -28,6 +28,7 @@ import {
   sampleHistory,
   sampleRooms,
   timeAgo,
+  locationLabel,
 } from "./rooms.js";
 import { useRooms, useSavedRooms } from "./useRooms.js";
 import { fetchJson } from "./api.js";
@@ -263,12 +264,7 @@ function RoomCard({
   const percent =
     count != null && capacity ? Math.min(100, (count / capacity) * 100) : null;
   const seats = availableSeats(room, now, staleAfterSeconds);
-  const location = [
-    room.location?.building,
-    room.location?.room_number ? `Room ${room.location.room_number}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const location = locationLabel(room.location);
   return (
     <article
       className="room-card"
@@ -499,12 +495,7 @@ function RoomDetails({
     return () => controller.abort();
     // A detail request represents one snapshot; the room's latest reading still updates live.
   }, [room.room_id, demo, attempt]);
-  const location = [
-    room.location?.building,
-    room.location?.room_number ? `Room ${room.location.room_number}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const location = locationLabel(room.location);
   return (
     <Modal title={room.name} onClose={onClose} wide>
       <span className="eyebrow">
