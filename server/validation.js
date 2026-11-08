@@ -25,11 +25,16 @@ export function timestamp(value, field = 'measured_at') {
 
 export function validateReading(body, now = Date.now()) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new ApiError(400, 'Expected a JSON object.');
-  const fields = ['room_id', 'people_count', 'noise_level', 'noise_unit', 'measured_at'];
+  const fields = ['room_id', 'people_count', 'noise_level', 'noise_unit', 'measured_at', 'average_confidence'];
   if (Object.keys(body).some(k => !fields.includes(k))) throw new ApiError(400, 'Unknown reading field.');
   const room_id = validateId(body.room_id);
   if (!Number.isInteger(body.people_count) || body.people_count < 0 || body.people_count > 2147483647) {
     throw new ApiError(400, 'people_count must be a nonnegative integer.');
+  }
+  const average_confidence = body.average_confidence ?? null;
+  if (average_confidence !== null && (typeof average_confidence !== 'number'
+      || !Number.isFinite(average_confidence) || average_confidence < 0 || average_confidence > 1)) {
+    throw new ApiError(400, 'average_confidence must be between 0 and 1, or null.');
   }
   if (!['relative', 'dBA'].includes(body.noise_unit)) throw new ApiError(400, 'noise_unit must be relative or dBA.');
   const max = body.noise_unit === 'relative' ? 1 : 160;
@@ -39,7 +44,7 @@ export function validateReading(body, now = Date.now()) {
   }
   const measured_at = timestamp(body.measured_at);
   if (Date.parse(measured_at) > now + 60000) throw new ApiError(400, 'measured_at is more than 60 seconds in the future.');
-  return { room_id, people_count: body.people_count, noise_level: body.noise_level, noise_unit: body.noise_unit, measured_at };
+  return { room_id, people_count: body.people_count, noise_level: body.noise_level, noise_unit: body.noise_unit, measured_at, average_confidence };
 }
 
 export function validateMetadata(room) {
@@ -94,4 +99,24 @@ export function parseCursor(value, roomId) {
       since: timestamp(cursor.since, 'since'),
     };
   } catch { throw new ApiError(400, 'Invalid history cursor.'); }
+}
+
+export function validateReport(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw new ApiError(400, 'Expected a JSON object.');
+  const allowed = ['room_id', 'people_count', 'occupancy_percent', 'noise_band'];
+  if (Object.keys(body).some(key => !allowed.includes(key))) throw new ApiError(400, 'Unknown report field.');
+  const room_id = validateId(body.room_id);
+  const people_count = body.people_count ?? null;
+  const occupancy_percent = body.occupancy_percent ?? null;
+  const noise_band = body.noise_band ?? null;
+  if (people_count !== null && (!Number.isInteger(people_count) || people_count < 0 || people_count > 10000)) {
+    throw new ApiError(400, 'People count must be a whole number from 0 to 10,000.');
+  }
+  if (occupancy_percent !== null && (typeof occupancy_percent !== 'number' || !Number.isFinite(occupancy_percent) || occupancy_percent < 0 || occupancy_percent > 100)) {
+    throw new ApiError(400, 'Fullness must be a percentage from 0 to 100.');
+  }
+  if (people_count !== null && occupancy_percent !== null) throw new ApiError(400, 'Choose a people count or a fullness percentage, rather than both.');
+  if (noise_band !== null && !['quiet', 'moderate', 'lively'].includes(noise_band)) throw new ApiError(400, 'Noise must be quiet, moderate, or lively.');
+  if (people_count === null && occupancy_percent === null && noise_band === null) throw new ApiError(400, 'Add an occupancy or noise observation.');
+  return { room_id, people_count, occupancy_percent, noise_band };
 }

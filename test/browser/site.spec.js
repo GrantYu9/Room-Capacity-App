@@ -76,7 +76,7 @@ test("live spaces show current data, preserve unknown metadata and open activity
   await mockRooms(page);
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Find a quieter place to study" }),
+    page.getByRole("heading", { name: "Find a space that feels right." }),
   ).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(3);
   const reading = page.getByRole("article").filter({
@@ -252,7 +252,7 @@ test("help dialog and sample layout work without horizontal overflow", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "How it works", exact: true }).click();
   await expect(
-    page.getByRole("dialog", { name: "How room works" }),
+    page.getByRole("dialog", { name: "How Sensory Atlas works" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await page.getByRole("button", { name: /Explore sample spaces/ }).click();
@@ -260,7 +260,7 @@ test("help dialog and sample layout work without horizontal overflow", async ({
   await page.evaluate(() => document.fonts.ready);
   await noOverflow(page);
   await page
-    .getByRole("heading", { name: "Find a quieter place to study" })
+    .getByRole("heading", { name: "Find a space that feels right." })
     .scrollIntoViewIfNeeded();
   await page.evaluate(() => {
     document.activeElement?.blur();

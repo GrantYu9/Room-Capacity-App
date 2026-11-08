@@ -1,4 +1,4 @@
-# room. — a little space to focus
+# Sensory Atlas — a map of how places feel
 
 A responsive study-space dashboard for UBC: current occupancy, sound readings, room search, building filters, locally saved favourites, and recent activity. Built with React and Vite, with a Node API and a Tiger Data / TimescaleDB database.
 
@@ -28,8 +28,20 @@ The existing Tiger service has already been initialized for this project. `db:in
 
 ## Frontend behavior
 
+For a populated development dashboard, `npm run db:demo` adds all 68 directory spaces and six hours of fictional occupancy and relative sound readings across 38 buildings. Existing metadata and real devices are preserved. Demo devices use a `demo-` prefix, cannot authenticate uploads, and their readings are labeled fictional in the UI. Unknown published capacities remain unknown. Run `npm run db:demo -- --watch` to refresh simulated readings every 20 seconds; stop with Ctrl+C. The dashboard keeps saved demo-device values visible as **Static demo data** after the simulator stops; their measurement timestamps stay unchanged. Real sensor readings still expire normally after 60 seconds, and community estimates expire after 15 minutes. Demo values never establish a trusted baseline for community-report filtering. Repeated runs preserve existing history and skip duplicate device/timestamp pairs. This writes to the database configured by `DATABASE_URL`.
+
+### Community observations
+
+Open a space's details (or **Share an observation** in the unmonitored directory) to submit an optional headcount **or** approximate percentage full, and/or a quiet/moderate/lively noise impression. Zero is a valid observation. Sample preview does not submit reports. `POST /api/reports` accepts `room_id`, optional `people_count` (integer 0–10,000), `occupancy_percent` (0–100), and `noise_band` (`quiet`, `moderate`, `lively`). At least one measurement is required; count and percentage are mutually exclusive. Observation times are assigned by the server. Rooms must already be imported into the database.
+
+Run `npm run db:reports` once on an existing database (new `db:init` runs include it), and set a private `REPORT_SECRET` of at least 32 random characters in `.env.local` and in hosting environment settings. Do not prefix it with `VITE_`. A missing secret disables report submissions. The API and migration preserve sensor history; `/api/readings` continues to return original sensor measurements. `/api/rooms` adds an `estimate` object with independent occupancy/noise estimates and a non-identifying report summary. API responses never expose reporter or network hashes.
+
+Reports expire from estimates after 15 minutes. Only the latest observation per signed browser identity per metric contributes. Numeric reports are filtered using a median and bounded median absolute deviation (minimum tolerance 3 people or 15% of known capacity; otherwise 25% of the count baseline). A single valid report can contribute immediately, including when there is no fresh sensor reading. There is no minimum reporter count or network-diversity requirement. A fresh sensor anchors numeric outlier checks with weight 4; the community gets at most weight 3, with linear age decay. Noise uses the most reported category, with ties left unresolved; when a fresh sensor is present, a report more than one noise band away is excluded. Simulated sensor data never supplies trust. Percentage-only reports for unknown-capacity rooms stay percentages: the app does not invent headcounts or available seats. Qualitative noise is never converted into dBA or relative microphone units. The UI labels community and combined estimates; detail history remains sensor-only.
+
+Abuse controls are deliberately conservative heuristics, not calibrated statistical confidence or proof of distinct people. Anonymous reporting cannot stop coordinated users on multiple networks. Shared campus Wi-Fi does not affect report eligibility or aggregation weight. Counts above twice published capacity plus 10 are rejected. Database locks enforce one submission per browser/room per five minutes, six per browser per ten minutes, and forty per network per ten minutes even across concurrent requests. Server-signed, HttpOnly, SameSite cookies and keyed network hashes discourage cookie resets; IPv6 privacy addresses share a /64 network bucket. The local server ignores forwarded IP headers. Vercel uses its platform-provided `x-vercel-forwarded-for` header, as described in [Vercel's request-header documentation](https://vercel.com/docs/headers/request-headers). Keep this trust setting limited to Vercel. Neither raw IP addresses nor cookie IDs are stored in the reporting table. Report rows remain for abuse auditing after their estimation window; no automatic deletion job is installed.
+
 - Polls room data every 10 seconds, with a 12-second request timeout and a manual retry action.
-- Search by room name, building, room number, or address. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
+- Search by room name, building, room number, address, or a familiar alias (for example, Sauder finds ANGU). Search ignores accents and punctuation, matches words in any order, and tolerates small spelling errors. `data/building-aliases.json` holds editable building aliases shared by monitored and unmonitored search. Room numbers stay exact. Filter for available seats, quiet spaces, or saved spaces; sort by name or known available seats.
 - Favourites are saved in the visitor's browser. Counts reflect only rooms in the current live/sample view.
 - Missing capacity is **unknown**, never zero. Available seats are calculated only from fresh readings and known capacity. Counts over capacity are preserved.
 - Delayed readings are excluded from current availability and people totals. The API's `stale_after_seconds` controls freshness.
@@ -56,6 +68,12 @@ Custom domains registered with GoDaddy can be attached in Vercel's project domai
 
 ## Pi uploads
 
+The sensor repository now includes the full capture → analysis → durable outbox
+→ authenticated readings API loop. See [room/device mapping](docs/room-device-mapping.md)
+for installation, credentials, migration, movement/replacement and confidence
+semantics. On an existing database, run `npm run db:confidence` before deploying
+the updated API. Old readings retain null confidence; no historical values are invented.
+
 Register a device from a trusted backend environment:
 
 ```sh
@@ -70,7 +88,12 @@ Copy `.env.pi` and `examples/send_reading.py` to the Pi. Set `API_URL` to the de
 python3 examples/send_reading.py --people 4 --noise 0.35 --noise-unit relative
 ```
 
-Call the helper's `send_reading(...)` from the CV/audio loop every 10 seconds. It sends only counts and noise levels, retries transient failures with the original measurement timestamp, and refuses redirects to prevent forwarding a device token to another endpoint. It does not persist an offline queue. Keep the Pi's clock synchronized; measurements over 60 seconds into the future are rejected.
+The small example helper can also send `--average-confidence 0.8`; it has transient
+retries but no offline queue. For continuous operation, use the sensor repository's
+`interface/main.py --upload --env .env.sensor`, which reports each completed
+window immediately (default: 20 images and 10 seconds of audio every 60 seconds)
+and durably queues failed uploads. Keep the Pi's clock synchronized; measurements
+over 60 seconds into the future are rejected.
 
 ## API reference
 
@@ -82,6 +105,7 @@ Requires `Content-Type: application/json` and `Authorization: Bearer <DEVICE_TOK
 {
   "room_id": "room-1",
   "people_count": 4,
+  "average_confidence": 0.8,
   "noise_level": 0.35,
   "noise_unit": "relative",
   "measured_at": "2026-11-07T23:30:00.000Z"
@@ -89,6 +113,12 @@ Requires `Content-Type: application/json` and `Authorization: Bearer <DEVICE_TOK
 ```
 
 The device can upload only to its assigned room. Use ISO timestamps with a timezone and up to millisecond precision. Identical retries for the same device/timestamp return 200; changed values for an existing timestamp return 409. Uploads cannot change room capacity or location. Disable a lost token by setting `study_room.devices.active` to `false` through your database administration connection.
+
+`average_confidence` is optional and nullable, otherwise a finite number in [0,1].
+It is preserved in upload responses, latest room readings and history. For this
+sensor it means mean detected-person box score across the window; it is not a
+probability of count correctness or noise accuracy. Community fusion weights
+are unchanged; consumers can use this exposed value for a future validated policy.
 
 ### Public reads
 

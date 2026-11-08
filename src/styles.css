@@ -124,10 +124,11 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 36px;
+  font-size: 30px;
   line-height: 1;
   font-weight: 650;
-  letter-spacing: -2px;
+  letter-spacing: -1.1px;
+  white-space: nowrap;
 }
 .brand-mark {
   display: grid;
@@ -138,11 +139,11 @@ button {
   background: var(--green);
   border-radius: 11px 11px 11px 3px;
 }
-.brand-period {
-  color: #83a36c;
+.brand-atlas {
+  color: #497252;
 }
 .brand-small {
-  font-size: 28px;
+  font-size: 24px;
   gap: 8px;
 }
 .brand-small .brand-mark {
@@ -266,6 +267,17 @@ button {
   max-width: 430px;
   justify-self: end;
   width: 100%;
+  isolation: isolate;
+}
+.hero-art::before {
+  content: "";
+  position: absolute;
+  inset: 22px 4px 12px;
+  z-index: -1;
+  background-image: linear-gradient(#4f70500c 1px, transparent 1px), linear-gradient(90deg, #4f70500c 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse, #000 25%, transparent 72%);
+  pointer-events: none;
 }
 .art-note {
   position: absolute;
@@ -1619,10 +1631,10 @@ html:has(dialog[open]) {
   }
   .nav-wrap {
     height: 70px;
-    gap: 20px;
+    gap: 12px;
   }
   .brand {
-    font-size: 31px;
+    font-size: 20px;
     gap: 8px;
   }
   .brand-mark {
@@ -1891,7 +1903,7 @@ html:has(dialog[open]) {
     flex-wrap: wrap;
   }
   .brand-small {
-    font-size: 25px;
+    font-size: 20px;
   }
   .brand-small .brand-mark {
     width: 27px;
@@ -2127,3 +2139,23 @@ html:has(dialog[open]) {
   color: #5e6d56;
   font-size: 11px;
 }
+/* Optional community observations share the room detail dialog. */
+.report-form { margin: 24px 0; padding: 22px; border: 1px solid var(--line, #deded6); border-radius: 16px; background: var(--paper, #fafaf5); }
+.report-form h3 { margin: 0 0 8px; }
+.report-form p { line-height: 1.55; }
+.report-fields { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; margin: 18px 0; align-items: start; }
+.report-fields label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; }
+.report-fields input { width: 100%; min-width: 0; min-height: 44px; padding: 10px; border: 1px solid #9b9e91; border-radius: 8px; background: white; color: #28372e; font: inherit; }
+.report-choice-field { min-width: 0; margin: 0; padding: 0; border: 0; }
+.report-choice-field legend { margin-bottom: 8px; padding: 0; font-size: 13px; font-weight: 600; }
+.report-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.report-choices button { min-width: 0; min-height: 44px; padding: 10px 8px; border: 1px solid #9b9e91; border-radius: 8px; background: white; color: #28372e; font: inherit; font-size: 13px; line-height: 1.4; cursor: pointer; }
+.report-choices button[aria-pressed="true"] { border-color: #365847; background: #365847; color: white; font-weight: 600; }
+.report-choices button:hover:not(:disabled):not([aria-pressed="true"]) { background: #edf2e8; }
+.report-noise-field { grid-column: 1 / -1; }
+.report-noise-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.report-fields-percent > .report-choice-field { grid-column: 1 / -1; }
+.report-percent-choices { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.report-help, .estimate-source { font-size: 12px; color: #53634f; }
+.report-form button:disabled { opacity: .65; cursor: default; }
+@media (max-width: 650px) { .report-fields { grid-template-columns: 1fr; } .report-form { padding: 16px; } .report-noise-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); } .report-percent-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

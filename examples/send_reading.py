@@ -18,7 +18,7 @@ class NoUploadRedirects(urllib.request.HTTPRedirectHandler):
 
 
 def send_reading(api_url, token, room_id, people_count, noise_level, noise_unit,
-                 measured_at=None):
+                 measured_at=None, average_confidence=None):
     """Reuse measured_at when retrying a previously buffered measurement."""
     parsed = urllib.parse.urlsplit(api_url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password:
@@ -29,6 +29,7 @@ def send_reading(api_url, token, room_id, people_count, noise_level, noise_unit,
         "room_id": room_id, "people_count": people_count,
         "noise_level": noise_level, "noise_unit": noise_unit,
         "measured_at": measured_at,
+        "average_confidence": average_confidence,
     }).encode()
     request = urllib.request.Request(
         api_url.rstrip("/") + "/api/readings", data=payload, method="POST",
@@ -58,6 +59,7 @@ if __name__ == "__main__":
     parser.add_argument("--people", type=int, required=True)
     parser.add_argument("--noise", type=float, required=True)
     parser.add_argument("--noise-unit", choices=["relative", "dBA"], required=True)
+    parser.add_argument("--average-confidence", type=float)
     args = parser.parse_args()
     config = {}
     if Path(args.env).exists():
@@ -68,7 +70,7 @@ if __name__ == "__main__":
     config.update({key: os.environ[key] for key in ("API_URL", "DEVICE_TOKEN", "ROOM_ID") if key in os.environ})
     try:
         result = send_reading(config["API_URL"], config["DEVICE_TOKEN"], config["ROOM_ID"],
-                              args.people, args.noise, args.noise_unit)
+                              args.people, args.noise, args.noise_unit, average_confidence=args.average_confidence)
         print(json.dumps(result))
     except (KeyError, ValueError, RuntimeError) as error:
         parser.exit(1, ("Missing Pi configuration variable." if isinstance(error, KeyError) else str(error)) + "\n")

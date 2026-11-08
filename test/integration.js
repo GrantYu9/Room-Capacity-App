@@ -33,13 +33,15 @@ test('real Tiger Data: room-bound upload, idempotency, metadata, latest and page
     assert.equal(room.stale, true);
     const currentTime = Date.now();
     const measured = new Date(currentTime - 1000).toISOString();
-    const value = reading({ room_id: roomId, measured_at: measured });
+    const value = reading({ room_id: roomId, measured_at: measured, average_confidence: 0.72 });
     const first = await app.request('/api/readings', post(value));
     assert.equal(first.status, 200);
+    assert.equal(first.body.reading.average_confidence, 0.72);
     const retry = await app.request('/api/readings', post(value));
     assert.equal(retry.status, 200);
     assert.equal(retry.body.reading.received_at, first.body.reading.received_at);
     assert.equal((await app.request('/api/readings', post({ ...value, people_count: 5 }))).status, 409);
+    assert.equal((await app.request('/api/readings', post({ ...value, average_confidence: 0.9 }))).status, 409);
     assert.equal((await app.request('/api/readings', post({ ...value, room_id: 'another-room' }))).status, 403);
     for (const seconds of [3, 2]) {
       assert.equal((await app.request('/api/readings', post({ ...value,
@@ -50,6 +52,7 @@ test('real Tiger Data: room-bound upload, idempotency, metadata, latest and page
     room = (await app.request(roomPath)).body.rooms[0];
     assert.equal(Date.parse(room.latest_reading.measured_at), Date.parse(measured));
     assert.equal(room.latest_reading.noise_unit, 'relative');
+    assert.equal(room.latest_reading.average_confidence, 0.72);
     assert.equal(room.occupancy_fraction, null);
     await upsertRoom(db, validateMetadata({ room_id: roomId, name: 'Temporary integration test', total_capacity: 8 }));
     room = (await app.request(roomPath)).body.rooms[0];
@@ -61,6 +64,7 @@ test('real Tiger Data: room-bound upload, idempotency, metadata, latest and page
       const path = `/api/readings?room_id=${roomId}&limit=1` + (cursor ? '&cursor=' + cursor : '');
       const page = await app.request(path);
       assert.equal(page.status, 200);
+      assert.ok(page.body.readings.every(r => r.average_confidence === 0.72));
       seen.push(...page.body.readings.map(r => `${r.measured_at}:${r.device_id}`));
       cursor = page.body.next_cursor;
       assert.equal(page.body.has_more, Boolean(cursor));
@@ -73,6 +77,7 @@ test('real Tiger Data: room-bound upload, idempotency, metadata, latest and page
       'examples/send_reading.py', '--env', '/dev/null', '--people', '6', '--noise', '0.2', '--noise-unit', 'relative',
     ], { env: { ...process.env, API_URL: app.base, ROOM_ID: roomId, DEVICE_TOKEN: token }, timeout: 15000 });
     assert.equal(JSON.parse(uploaded.stdout).reading.people_count, 6);
+    assert.equal(JSON.parse(uploaded.stdout).reading.average_confidence, null);
     await db.query('UPDATE study_room.devices SET active = false WHERE device_id = $1', [deviceId]);
     assert.equal((await app.request('/api/readings', post(value))).status, 401);
     console.log('Verified real HTTP + SQL; temporary room, devices and readings will be rolled back.');

@@ -1,1 +1,1 @@
-export { handler as default } from '../server/runtime.js';
+export { handler as default } from '../server/serverless.js';

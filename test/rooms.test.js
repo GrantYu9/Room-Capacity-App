@@ -8,6 +8,8 @@ import {
   noiseBand,
   roomState,
   sampleRooms,
+  noiseReading,
+  occupancyReading,
 } from "../src/rooms.js";
 
 test("unknown capacity stays unknown; stale counts are not treated as available seats", () => {
@@ -76,4 +78,27 @@ test("sound values preserve explicit units and missing is distinct from zero", (
   assert.equal(formatNoise({ noise_level: 42.3, noise_unit: "dBA" }), "42 dBA");
   assert.equal(formatNoise({ noise_level: null }), "—");
   assert.equal(noiseBand({ noise_level: 0, noise_unit: "relative" }).label, "Quiet");
+});
+
+test('static database demos stay visible while real sensors and community estimates still expire', () => {
+  const now = Date.now();
+  const original = sampleRooms(now - 86400000)[0];
+  const room = { ...original, stale: true, latest_reading: { ...original.latest_reading, device_id: 'demo-fixture' } };
+  assert.equal(freshness(room, now, 60), 'demo');
+  assert.equal(roomState(room, now, 60).label, 'Static demo data');
+  assert.equal(availableSeats(room, now, 60), 11);
+  assert.equal(noiseReading(room, now, 60).noise_level, 0.12);
+  const expiry = new Date(now + 1000).toISOString();
+  const reported = { ...room, estimate: {
+    occupancy: { people_count: 7, expires_at: expiry },
+    noise: { noise_band: 'moderate', expires_at: expiry },
+  } };
+  assert.equal(occupancyReading(reported, now).people_count, 7);
+  assert.equal(noiseReading(reported, now, 60).noise_band, 'moderate');
+  assert.equal(freshness(reported, now + 2000, 60), 'demo');
+  assert.equal(occupancyReading(reported, now + 2000).people_count, 5);
+  const sensor = { ...room, latest_reading: { ...room.latest_reading, device_id: 'pi-1' } };
+  assert.equal(freshness(sensor, now, 60), 'delayed');
+  assert.equal(availableSeats(sensor, now, 60), null);
+  assert.equal(noiseReading(sensor, now, 60), null);
 });

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
-import { ApiError, validateId, validateReading, timestamp, parseCursor } from './validation.js';
+import { ApiError, validateId, validateReading, validateReport, timestamp, parseCursor } from './validation.js';
 import { presentRoom } from './store.js';
+import { reportIdentity } from './report-identity.js';
 
 async function readBody(req) {
   if (req.headers['content-type']?.split(';')[0].trim().toLowerCase() !== 'application/json') {
@@ -39,7 +40,7 @@ export function createHandler(store, config, { now = Date.now, onError = () => c
       if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
       const url = new URL(req.url, 'http://api.local');
       const methods = {
-        '/api/health': ['GET'], '/api/rooms': ['GET'], '/api/readings': ['GET', 'POST'],
+        '/api/health': ['GET'], '/api/rooms': ['GET'], '/api/readings': ['GET', 'POST'], '/api/reports': ['POST'],
       }[url.pathname];
       if (!methods) throw new ApiError(404, 'Endpoint not found.');
       res.setHeader('Allow', [...methods, 'OPTIONS'].join(', '));
@@ -60,6 +61,12 @@ export function createHandler(store, config, { now = Date.now, onError = () => c
         const rooms = await store.rooms(id);
         if (id !== null && !rooms.length) throw new ApiError(404, 'Room not found.');
         return send(200, { rooms: rooms.map(r => presentRoom(r, config.staleAfterSeconds, now())), stale_after_seconds: config.staleAfterSeconds });
+      }
+      if (url.pathname === '/api/reports') {
+        const report = validateReport(await readBody(req));
+        const identity = reportIdentity(req, res, config);
+        await store.report(report, identity);
+        return send(201, { saved: true, message: 'Thanks! Your observation has been received and will contribute if it passes the outlier checks.' });
       }
       if (req.method === 'GET') {
         const id = validateId(url.searchParams.get('room_id'));
@@ -89,7 +96,10 @@ export function createHandler(store, config, { now = Date.now, onError = () => c
       if (!saved) throw new ApiError(409, 'A different reading already exists for this device and timestamp.');
       return send(200, { reading: saved });
     } catch (error) {
-      if (error instanceof ApiError) return send(error.status, { error: error.message });
+      if (error instanceof ApiError) {
+        if (error.status === 429) res.setHeader('Retry-After', '300');
+        return send(error.status, { error: error.message });
+      }
       onError();
       return send(503, { error: 'Database temporarily unavailable.' });
     }

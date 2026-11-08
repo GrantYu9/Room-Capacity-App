@@ -27,6 +27,7 @@ test('uploads require a valid room-bound token and validated measurements', asyn
     { people_count: -1 }, { people_count: 1.5 }, { people_count: '4' },
     { noise_level: 1.1 }, { noise_level: '0.2' }, { noise_unit: 'dB' },
     { noise_unit: 'dBA', noise_level: 161 }, { total_capacity: 20 },
+    { average_confidence: -0.1 }, { average_confidence: 1.1 }, { average_confidence: '0.8' },
     { measured_at: '2026-11-07T12:00:00' }, { measured_at: '2026-02-30T12:00:00Z' },
     { measured_at: new Date(Date.now() + 120000).toISOString() },
   ]) assert.equal((await app.request('/api/readings', post(reading(change)))).status, 400);
@@ -34,6 +35,21 @@ test('uploads require a valid room-bound token and validated measurements', asyn
   assert.equal((await app.request('/api/readings', post(reading()))).status, 200);
   assert.equal((await app.request('/api/readings', post(reading({ noise_unit: 'dBA', noise_level: 55 })))).status, 200);
   assert.equal(writes, 2);
+});
+
+test('reading confidence is optional, nullable, and preserved including zero', async t => {
+  const app = await serve({
+    findDevice: async () => ({ device_id: 'pi-1', room_id: 'room-1' }),
+    record: async (_device, value) => value,
+  });
+  t.after(() => app.close());
+  for (const confidence of [null, 0, 0.72, 1]) {
+    const result = await app.request('/api/readings', post(reading({ average_confidence: confidence })));
+    assert.equal(result.status, 200);
+    assert.equal(result.body.reading.average_confidence, confidence);
+  }
+  const result = await app.request('/api/readings', post(reading()));
+  assert.equal(result.body.reading.average_confidence, null);
 });
 
 test('malformed/oversized bodies and unwanted browser origins are rejected', async t => {

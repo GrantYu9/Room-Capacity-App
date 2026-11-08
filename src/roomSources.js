@@ -9,10 +9,10 @@ function sameRoom(left, right) {
 export function splitRoomSources(catalog, apiRooms) {
   return {
     monitored: apiRooms.filter((room) =>
-      room.latest_reading || !catalog.some((listing) => sameRoom(listing, room)),
+      room.latest_reading || room.estimate?.reports?.recent || !catalog.some((listing) => sameRoom(listing, room)),
     ),
     unmonitored: catalog.filter((listing) =>
-      !apiRooms.some((room) => room.latest_reading && sameRoom(listing, room)),
+      !apiRooms.some((room) => (room.latest_reading || room.estimate?.reports?.recent) && sameRoom(listing, room)),
     ),
   };
 }

@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS study_room.readings (
     device_id text NOT NULL REFERENCES study_room.devices(device_id),
     room_id text NOT NULL REFERENCES study_room.rooms(room_id),
     people_count integer NOT NULL CHECK (people_count >= 0),
+    average_confidence double precision CHECK (average_confidence BETWEEN 0 AND 1),
     noise_level double precision NOT NULL,
     noise_unit text NOT NULL CHECK (noise_unit IN ('relative', 'dBA')),
     PRIMARY KEY (device_id, measured_at),
@@ -39,6 +40,10 @@ CREATE TABLE IF NOT EXISTS study_room.readings (
         OR (noise_unit = 'dBA' AND noise_level BETWEEN 0 AND 160)
     )
 );
+
+-- Upgrade existing installations too; historical/legacy readings remain unknown.
+ALTER TABLE study_room.readings ADD COLUMN IF NOT EXISTS average_confidence
+    double precision CHECK (average_confidence BETWEEN 0 AND 1);
 
 SELECT create_hypertable(
     'study_room.readings', 'measured_at',

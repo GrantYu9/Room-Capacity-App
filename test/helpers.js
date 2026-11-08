@@ -3,7 +3,7 @@ import { once } from 'node:events';
 import { createHandler } from '../server/handler.js';
 
 export async function serve(store, options = {}) {
-  const config = { origins: ['http://localhost:5173'], staleAfterSeconds: 60 };
+  const config = { origins: ['http://localhost:5173'], staleAfterSeconds: 60, ...options.config };
   const server = createServer(createHandler(store, config, { onError: () => {}, ...options }));
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
